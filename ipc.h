@@ -45,6 +45,9 @@ IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx );
 
 /* compatibility functions for older Lua versions */
 #if LUA_VERSION_NUM == 501
+
+typedef int lua_KContext;
+
 IPC_LOCAL int ipc_absindex( lua_State* L, int idx );
 #define lua_absindex( L, i ) ipc_absindex( L, i )
 
@@ -57,7 +60,54 @@ IPC_LOCAL void* ipc_testudata( lua_State* L, int idx,
 
 #define luaL_newlib( L, r ) \
   (lua_newtable( L ), luaL_register( L, NULL, r ))
-#endif /* LUA_VERSION_NUM == 501 */
+
+#define lua_callk( L, na, nr, ctx, cont ) \
+  ((void)ctx, (void)cont, lua_call( L, na, nr ))
+
+#define lua_pcallk( L, na, nr, err, ctx, cont ) \
+  ((void)ctx, (void)cont, lua_pcall( L, na, nr, err ))
+
+#elif LUA_VERSION_NUM == 502
+
+typedef int lua_KContext;
+
+#define LUA_KFUNCTION( _name ) \
+  static int (_name)( lua_State* L, int status, lua_KContext ctx ); \
+  static int (_name ## _52)( lua_State* L ) { \
+    lua_KContext ctx; \
+    int status = lua_getctx( L, &ctx ); \
+    return (_name)( L, status, ctx ); \
+  } \
+  static int (_name)( lua_State* L, int status, lua_KContext ctx )
+
+#define lua_callk( L, na, nr, ctx, cont ) \
+  lua_callk( L, na, nr, ctx, cont ## _52 )
+
+#define lua_pcallk( L, na, nr, err, ctx, cont ) \
+  lua_pcallk( L, na, nr, err, ctx, cont ## _52 )
+
+#ifdef lua_call
+#  undef lua_call
+#  define lua_call( L, na, nr ) \
+  (lua_callk)( L, na, nr, 0, NULL )
+#endif
+
+#ifdef lua_pcall
+#  undef lua_pcall
+#  define lua_pcall( L, na, nr, err ) \
+  (lua_pcallk( L, na, nr, err, 0, NULL )
+#endif
+
+#endif /* LUA_VERSION_NUM */
+
+
+#ifndef LUA_KFUNCTION
+
+/* definition for everything except Lua 5.2 */
+#define LUA_KFUNCTION( _name ) \
+  static int (_name)( lua_State* L, int status, lua_KContext ctx )
+
+#endif
 
 
 #endif /* IPC_H_ */
