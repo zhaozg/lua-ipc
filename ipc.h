@@ -40,12 +40,17 @@
 
 
 IPC_LOCAL FILE* ipc_checkfile( lua_State* L, int idx );
+IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx );
 
 
 /* compatibility functions for older Lua versions */
 #if LUA_VERSION_NUM == 501
 IPC_LOCAL int ipc_absindex( lua_State* L, int idx );
 #define lua_absindex( L, i ) ipc_absindex( L, i )
+
+IPC_LOCAL void* ipc_testudata( lua_State* L, int idx,
+                               char const* name );
+#define luaL_testudata( L, i, n ) ipc_testudata( L, i, n )
 
 #define lua_setuservalue( L, i ) lua_setfenv( L, i )
 #define lua_getuservalue( L, i ) lua_getfenv( L, i )
