@@ -36,7 +36,7 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
       *could_lock = 0;
       return 0;
     }
-    return errno;
+    return IPC_ERR( errno );
   }
   if( could_lock != NULL )
     *could_lock = 1;
@@ -52,7 +52,7 @@ static int ipc_flock_unlock( FILE* f, ipc_flock_off_t start,
   fl.l_start = start;
   fl.l_len = len;
   if( fcntl( fileno( f ), F_SETLK, &fl ) < 0 )
-    return errno;
+    return IPC_ERR( errno );
   return 0;
 }
 

@@ -37,9 +37,9 @@ static void ipc_shm_error( char* buf, size_t len, int code ) {
 static int ipc_shm_make_name( char const* s, ipc_shm_handle* h ) {
   size_t ilen = strlen( s );
   if( ilen == 0 || ilen+2 > sizeof( h->name ) )
-    return ENAMETOOLONG;
+    return IPC_ERR( ENAMETOOLONG );
   if( strchr( s, '/' ) != NULL )
-    return EINVAL;
+    return IPC_ERR( EINVAL );
   h->name[ 0 ] = '/';
   memcpy( h->name+1, s, ilen+1 );
   return 0;
@@ -51,22 +51,22 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   int fd, rv, flags = O_RDWR|O_CREAT|O_EXCL;
   rv = ipc_shm_make_name( name, h );
   if( rv != 0 )
-    return rv;
+    return IPC_ERR( rv );
   if( req == 0 )
-    return EINVAL;
+    return IPC_ERR( EINVAL );
   /* open(create) shm object */
 #ifdef O_CLOEXEC
   flags |= O_CLOEXEC;
 #endif
   fd = shm_open( h->name, flags, S_IRUSR|S_IWUSR );
   if( fd < 0 )
-    return errno;
+    return IPC_ERR( errno );
   /* resize to requested size */
   if( ftruncate( fd, (off_t)req ) < 0 ) {
     int saved_errno = errno;
     close( fd );
     shm_unlink( h->name );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   h->len = req;
   /* create mmap */
@@ -75,7 +75,7 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
     int saved_errno = errno;
     close( fd );
     shm_unlink( h->name );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   close( fd ); /* we don't need it anymore! */
   return 0;
@@ -87,23 +87,23 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   struct stat buf;
   rv = ipc_shm_make_name( name, h );
   if( rv != 0 )
-    return rv;
+    return IPC_ERR( rv );
   /* open shared memory object */
 #ifdef O_CLOEXEC
   flags |= O_CLOEXEC;
 #endif
   fd = shm_open( h->name, flags, S_IRUSR|S_IWUSR );
   if( fd < 0 )
-    return errno;
+    return IPC_ERR( errno );
   /* figure out its size */
   if( fstat( fd, &buf ) < 0 ) {
     int saved_errno = errno;
     close( fd );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   if( buf.st_size > ~((size_t)0) ) {
     close( fd );
-    return EFBIG;
+    return IPC_ERR( EFBIG );
   }
   h->len = buf.st_size;
   /* create mmap */
@@ -111,7 +111,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   if( h->addr == MAP_FAILED ) {
     int saved_errno = errno;
     close( fd );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   close( fd ); /* we don't need it anymore! */
   return 0;
@@ -120,7 +120,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
 
 static int ipc_shm_detach( ipc_shm_handle* h ) {
   if( munmap( h->addr, h->len ) < 0 )
-    return errno;
+    return IPC_ERR( errno );
   return 0;
 }
 
@@ -129,7 +129,7 @@ static int ipc_shm_remove( ipc_shm_handle* h ) {
   if( munmap( h->addr, h->len ) < 0 ) {
     int saved_errno = errno;
     shm_unlink( h->name ); /* try to delete it anyway */
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   shm_unlink( h->name );
   return 0;

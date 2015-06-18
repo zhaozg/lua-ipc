@@ -62,16 +62,16 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
                        FILE_ATTRIBUTE_NORMAL,
                        NULL );
   if( hfile == INVALID_HANDLE_VALUE )
-    return GetLastError();
+    return IPC_ERR( GetLastError() );
   /* figure out the size of the file */
   if( !GetFileSizeEx( hfile, &fsize ) ) {
     int saved_errno = GetLastError();
     CloseHandle( hfile );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   if( fsize.QuadPart > ~((size_t)0) ) {
     CloseHandle( hfile );
-    return ERROR_ARITHMETIC_OVERFLOW;
+    return IPC_ERR( ERROR_ARITHMETIC_OVERFLOW );
   }
   h->len = (size_t)fsize.QuadPart;
   /* create the anonymous file mapping */
@@ -84,7 +84,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
   if( hmap == NULL ) {
     int saved_errno = GetLastError();
     CloseHandle( hfile );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   /* get an address for the file mapping */
   h->addr = MapViewOfFile( hmap,
@@ -96,7 +96,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
     int saved_errno = GetLastError();
     CloseHandle( hmap );
     CloseHandle( hfile );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   CloseHandle( hmap );
   CloseHandle( hfile );
@@ -106,7 +106,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
 
 static int ipc_mmap_close( ipc_mmap_handle* h ) {
   if( !UnmapViewOfFile( h->addr ) )
-    return GetLastError();
+    return IPC_ERR( GetLastError() );
   return 0;
 }
 
@@ -114,7 +114,7 @@ static int ipc_mmap_close( ipc_mmap_handle* h ) {
 #define IPC_MMAP_HAVE_FLUSH
 static int ipc_mmap_flush( ipc_mmap_handle* h, size_t pos ) {
   if( !FlushViewOfFile( h->addr, pos ) )
-    return GetLastError();
+    return IPC_ERR( GetLastError() );
   return 0;
 }
 

@@ -34,6 +34,13 @@
 #define IPC_MAXERRMSG 200
 
 
+#ifndef NDEBUG
+#  define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, code ))
+#else
+#  define IPC_ERR( code ) (code)
+#endif
+
+
 #define IPC_NOTIMPLEMENTED( L ) \
   luaL_error( L, "module '%s' not implemented on this platform", \
               lua_tostring( L, 1 ) )
@@ -41,6 +48,7 @@
 
 IPC_LOCAL FILE* ipc_checkfile( lua_State* L, int idx );
 IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx );
+IPC_LOCAL int ipc_err( char const* file, int line, int code );
 
 
 /* compatibility functions for older Lua versions */

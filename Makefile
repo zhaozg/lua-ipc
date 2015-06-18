@@ -5,7 +5,7 @@ LUA_INCDIR = /usr/include/lua5.2
 DLL_INSTALL_DIR = /usr/local/lib/lua/5.2
 EXTRALIBS = -lrt
 
-CFLAGS = -Wall -fpic -O2 -DNDEBUG
+CFLAGS = -Wall -fpic -O2
 INCLUDES = -I${LUA_INCDIR}
 LIBFLAG = -shared
 LIB_EXTENSION = so

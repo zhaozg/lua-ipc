@@ -48,12 +48,12 @@ static void ipc_shm_error( char* buf, size_t len, int code ) {
 static int ipc_shm_make_name( char const* s, char** name ) {
   size_t len = strlen( s );
   if( len == 0 || strcspn( s, "/\\" ) != len )
-    return ERROR_INVALID_NAME;
+    return IPC_ERR( ERROR_INVALID_NAME );
   /* FIXME: should we try a "Global\\" name first? */
 #define P "Local\\"
   *name = malloc( len + sizeof( P ) );
   if( *name == NULL )
-    return ERROR_OUTOFMEMORY; /* or ERROR_NOT_ENOUGH_MEMORY?! */
+    return IPC_ERR( ERROR_OUTOFMEMORY ); /* or ERROR_NOT_ENOUGH_MEMORY?! */
   memcpy( *name, P, sizeof( P )-1 );
   memcpy( *name+sizeof( P )-1, s, len+1 );
 #undef P
@@ -68,10 +68,10 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   size_t rreq = req + sizeof( header );
   int rv = ipc_shm_make_name( name, &rname );
   if( rv != 0 )
-    return rv;
+    return IPC_ERR( rv );
   if( req == 0 ) {
     free( rname );
-    return ERROR_INVALID_PARAMETER;
+    return IPC_ERR( ERROR_INVALID_PARAMETER );
   }
   memcpy( header.magic, MAGIC, sizeof( header.magic ) );
   header.hisize = sizeof( size_t ) > 4 ? ((req >> 16) >> 16) : 0;
@@ -87,13 +87,13 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   if( h->h == NULL ) {
     int saved_errno = GetLastError();
     free( rname );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   } else if( GetLastError() == ERROR_ALREADY_EXISTS ) {
     /* It seems we have no way of actually removing the shared memory
      * object -- should we fail with EEXIST anyway?! */
     CloseHandle( h->h );
     free( rname );
-    return ERROR_ALREADY_EXISTS;
+    return IPC_ERR( ERROR_ALREADY_EXISTS );
   }
   /* Windows automatically handles the lifetime of the shared memory
    * object, so we don't need to keep track of the name! */
@@ -106,7 +106,7 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   if( h->raddr == NULL ) {
     int saved_errno = GetLastError();
     CloseHandle( h->h );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   *(ipc_shm_header*)(h->raddr) = header;
   h->addr = ((char*)(h->raddr))+sizeof( header );
@@ -121,14 +121,14 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   char* rname = NULL;
   int rv = ipc_shm_make_name( name, &rname );
   if( rv != 0 )
-    return rv;
+    return IPC_ERR( rv );
   hmap = OpenFileMappingA( FILE_MAP_ALL_ACCESS,
                            FALSE,
                            rname );
   if( hmap == NULL ) {
     int saved_errno = GetLastError();
     free( rname );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   free( rname );
   h->raddr = MapViewOfFile( hmap,
@@ -139,7 +139,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   if( h->raddr == NULL ) {
     int saved_errno = GetLastError();
     CloseHandle( hmap );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   CloseHandle( hmap );
   hptr = h->raddr;
@@ -149,7 +149,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
       h->len += (((size_t)hptr->hisize) << 16) << 16;
     } else if( hptr->hisize != 0 ) {
       UnmapViewOfFile( h->raddr );
-      return ERROR_ARITHMETIC_OVERFLOW;
+      return IPC_ERR( ERROR_ARITHMETIC_OVERFLOW );
     }
     h->addr = ((char*)h->raddr) + sizeof( *hptr );
   } else {
@@ -160,7 +160,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
     if( VirtualQuery( h->raddr, &meminfo, sizeof( meminfo ) ) == 0 ) {
       int saved_errno = GetLastError();
       UnmapViewOfFile( h->raddr );
-      return saved_errno;
+      return IPC_ERR( saved_errno );
     }
     h->addr = h->raddr;
     h->len = meminfo.RegionSize;
@@ -171,7 +171,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
 
 static int ipc_shm_detach( ipc_shm_handle* h ) {
   if( !UnmapViewOfFile( h->raddr ) )
-    return GetLastError();
+    return IPC_ERR( GetLastError() );
   return 0;
 }
 
@@ -180,7 +180,7 @@ static int ipc_shm_remove( ipc_shm_handle* h ) {
   if( !UnmapViewOfFile( h->raddr ) ) {
     int saved_errno = GetLastError();
     CloseHandle( h->h );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   CloseHandle( h->h );
   return 0;

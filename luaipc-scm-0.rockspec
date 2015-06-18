@@ -17,7 +17,7 @@ dependencies = {
 
 local win_defines = {
   "IPC_API=__declspec(dllexport)",
-  "NDEBUG",
+--  "NDEBUG",
   "_CRT_SECURE_NO_WARNINGS",
 }
 
@@ -27,7 +27,7 @@ build = {
     DLL_INSTALL_DIR = "$(LIBDIR)",
     LUA_INCDIR = "$(LUA_INCDIR)",
     CC = "$(CC)",
-    CFLAGS = "$(CFLAGS)",
+    CFLAGS = "$(CFLAGS) -DNDEBUG",
     LIBFLAG = "$(LIBFLAG)",
     LIB_EXTENSION = "$(LIB_EXTENSION)",
     EXTRALIBS = "",

@@ -45,6 +45,16 @@ IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx ) {
 }
 
 
+IPC_LOCAL int ipc_err( char const* file, int line, int code ) {
+  if( code != 0 ) {
+    fprintf( stderr, "[%s:%d]: error return (%d)\n",
+             file, line, code );
+    fflush( stderr );
+  }
+  return code;
+}
+
+
 /* implementation of compatibility functions */
 #if LUA_VERSION_NUM == 501
 IPC_LOCAL int ipc_absindex( lua_State* L, int idx ) {

@@ -37,11 +37,11 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
   DWORD lenlo, lenhi;
   OVERLAPPED ov;
   if( fh == (HANDLE)INVALID_HANDLE_VALUE )
-    return ERROR_INVALID_HANDLE;
+    return IPC_ERR( ERROR_INVALID_HANDLE );
   if( could_lock != NULL )
     flags |= LOCKFILE_FAIL_IMMEDIATELY;
   if( start < 0 || len < 0 )
-    return ERROR_INVALID_PARAMETER;
+    return IPC_ERR( ERROR_INVALID_PARAMETER );
   lenlo = (DWORD)len;
   lenhi = 0;
   ov.Offset = (DWORD)start;
@@ -60,7 +60,7 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
       *could_lock = 0;
       return 0;
     }
-    return code;
+    return IPC_ERR( code );
   }
   if( could_lock != NULL )
     *could_lock = 1;
@@ -74,9 +74,9 @@ static int ipc_flock_unlock( FILE* f, ipc_flock_off_t start,
   DWORD lenlo, lenhi;
   DWORD offlo, offhi;
   if( fh == (HANDLE)INVALID_HANDLE_VALUE )
-    return ERROR_INVALID_HANDLE;
+    return IPC_ERR( ERROR_INVALID_HANDLE );
   if( start < 0 || len < 0 )
-    return ERROR_INVALID_PARAMETER;
+    return IPC_ERR( ERROR_INVALID_PARAMETER );
   offlo = (DWORD)start;
   offhi = 0;
   lenlo = (DWORD)len;
@@ -88,7 +88,7 @@ static int ipc_flock_unlock( FILE* f, ipc_flock_off_t start,
   if( len == 0 )
     lenhi = lenlo = (DWORD)-1;
   if( !UnlockFile( fh, offlo, offhi, lenlo, lenhi ) )
-    return GetLastError();
+    return IPC_ERR( GetLastError() );
   return 0;
 }
 

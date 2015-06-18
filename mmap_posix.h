@@ -49,16 +49,16 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
 #endif
   fd = open( name, oflags );
   if( fd < 0 )
-    return errno;
+    return IPC_ERR( errno );
   /* figure out its size */
   if( fstat( fd, &buf ) < 0 ) {
     int saved_errno = errno;
     close( fd );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   if( buf.st_size > ~((size_t)0) ) {
     close( fd );
-    return EFBIG;
+    return IPC_ERR( EFBIG );
   }
   h->len = buf.st_size;
   /* create mmap */
@@ -66,7 +66,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
   if( h->addr == MAP_FAILED ) {
     int saved_errno = errno;
     close( fd );
-    return saved_errno;
+    return IPC_ERR( saved_errno );
   }
   close( fd ); /* we don't need it anymore! */
   return 0;
@@ -76,7 +76,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
 static int ipc_mmap_close( ipc_mmap_handle* h ) {
   int rv = munmap( h->addr, h->len );
   if( rv < 0 )
-    return errno;
+    return IPC_ERR( errno );
   return 0;
 }
 
@@ -86,7 +86,7 @@ static int ipc_mmap_close( ipc_mmap_handle* h ) {
 static int ipc_mmap_flush( ipc_mmap_handle* h, size_t pos ) {
   int rv = msync( h->addr, pos, MS_ASYNC|MS_INVALIDATE );
   if( rv < 0 )
-    return errno;
+    return IPC_ERR( errno );
   return 0;
 }
 #endif
