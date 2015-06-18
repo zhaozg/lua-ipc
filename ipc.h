@@ -35,9 +35,9 @@
 
 
 #ifndef NDEBUG
-#  define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, code ))
+#  define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, (int)(code) ))
 #else
-#  define IPC_ERR( code ) (code)
+#  define IPC_ERR( code ) ((int)(code))
 #endif
 
 
