@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <limits.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -12,16 +13,22 @@ typedef struct {
 
 
 static void ipc_sem_error( char* buf, size_t len, int code ) {
-  if( len > 0 && 0 == FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM |
-                                      FORMAT_MESSAGE_IGNORE_INSERTS,
-                                      NULL,
-                                      code,
-                                      0,
-                                      buf,
-                                      len,
-                                      NULL ) ) {
-    strncpy( buf, "unknown error", len-1 );
-    buf[ len-1 ] = '\0';
+  if( len > 0 ) {
+    if( 0 == FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM |
+                             FORMAT_MESSAGE_IGNORE_INSERTS,
+                             NULL,
+                             code,
+                             0,
+                             buf,
+                             len,
+                             NULL ) ) {
+      strncpy( buf, "unknown error", len-1 );
+      buf[ len-1 ] = '\0';
+    } else { /* Windows puts an extra newline in there! */
+      size_t n = strlen( buf );
+      while( n > 0 && isspace( (unsigned char)buf[ --n ] ) )
+        buf[ n ] = '\0';
+    }
   }
 }
 

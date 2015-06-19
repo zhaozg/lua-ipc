@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <ctype.h>
 #include <lua.h> /* we need the definition of lua_Integer */
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -15,16 +15,22 @@ typedef lua_Integer ipc_flock_off_t;
 
 
 static void ipc_flock_error( char* buf, size_t len, int code ) {
-  if( len > 0 && 0 == FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM |
-                                      FORMAT_MESSAGE_IGNORE_INSERTS,
-                                      NULL,
-                                      code,
-                                      0,
-                                      buf,
-                                      len,
-                                      NULL ) ) {
-    strncpy( buf, "unknown error", len-1 );
-    buf[ len-1 ] = '\0';
+  if( len > 0 ) {
+    if( 0 == FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM |
+                             FORMAT_MESSAGE_IGNORE_INSERTS,
+                             NULL,
+                             code,
+                             0,
+                             buf,
+                             len,
+                             NULL ) ) {
+      strncpy( buf, "unknown error", len-1 );
+      buf[ len-1 ] = '\0';
+    } else { /* Windows puts an extra newline in there! */
+      size_t n = strlen( buf );
+      while( n > 0 && isspace( (unsigned char)buf[ --n ] ) )
+        buf[ n ] = '\0';
+    }
   }
 }
 

@@ -63,6 +63,8 @@ IPC_LOCAL void* ipc_testudata( lua_State* L, int idx,
                                char const* name );
 #define luaL_testudata( L, i, n ) ipc_testudata( L, i, n )
 
+#define lua_rawlen( L, i ) lua_objlen( L, i )
+
 #define lua_setuservalue( L, i ) lua_setfenv( L, i )
 #define lua_getuservalue( L, i ) lua_getfenv( L, i )
 
