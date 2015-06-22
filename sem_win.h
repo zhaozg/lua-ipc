@@ -33,7 +33,7 @@ static void ipc_sem_error( char* buf, size_t len, int code ) {
 }
 
 
-static int ipc_sem_make_name( char const* s, char** name ) {
+static int ipc_sem_make_name_( char const* s, char** name ) {
   size_t len = strlen( s );
   if( len == 0 || len > MAX_PATH || strcspn( s, "/\\" ) != len )
     return IPC_ERR( ERROR_INVALID_NAME );
@@ -52,7 +52,7 @@ static int ipc_sem_make_name( char const* s, char** name ) {
 static int ipc_sem_create( ipc_sem_handle* h, char const* name,
                            unsigned value ) {
   char* rname = NULL;
-  int rv = ipc_sem_make_name( name, &rname );
+  int rv = ipc_sem_make_name_( name, &rname );
   if( rv != 0 )
     return IPC_ERR( rv );
   if( value > LONG_MAX ) {
@@ -81,7 +81,7 @@ static int ipc_sem_create( ipc_sem_handle* h, char const* name,
 
 static int ipc_sem_open( ipc_sem_handle* h, char const* name ) {
   char* rname = NULL;
-  int rv = ipc_sem_make_name( name, &rname );
+  int rv = ipc_sem_make_name_( name, &rname );
   if( rv != 0 )
     return IPC_ERR( rv );
   h->sem = OpenSemaphoreA( SEMAPHORE_ALL_ACCESS,

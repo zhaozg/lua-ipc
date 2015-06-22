@@ -52,7 +52,7 @@ static void ipc_shm_error( char* buf, size_t len, int code ) {
 }
 
 
-static int ipc_shm_make_name( char const* s, char** name ) {
+static int ipc_shm_make_name_( char const* s, char** name ) {
   size_t len = strlen( s );
   if( len == 0 || strcspn( s, "/\\" ) != len )
     return IPC_ERR( ERROR_INVALID_NAME );
@@ -73,7 +73,7 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   char* rname = NULL;
   ipc_shm_header header;
   size_t rreq = req + sizeof( header );
-  int rv = ipc_shm_make_name( name, &rname );
+  int rv = ipc_shm_make_name_( name, &rname );
   if( rv != 0 )
     return IPC_ERR( rv );
   if( req == 0 ) {
@@ -126,7 +126,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   HANDLE hmap;
   ipc_shm_header* hptr = NULL;
   char* rname = NULL;
-  int rv = ipc_shm_make_name( name, &rname );
+  int rv = ipc_shm_make_name_( name, &rname );
   if( rv != 0 )
     return IPC_ERR( rv );
   hmap = OpenFileMappingA( FILE_MAP_ALL_ACCESS,

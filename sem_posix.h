@@ -27,7 +27,7 @@ static void ipc_sem_error( char* buf, size_t len, int code ) {
 /* the format of sem names is restricted (at least if you want to be
  * portable), so this functions checks the input and makes such a
  * portable name. */
-static int ipc_sem_make_name( char const* s, ipc_sem_handle* h ) {
+static int ipc_sem_make_name_( char const* s, ipc_sem_handle* h ) {
   size_t ilen = strlen( s );
   if( ilen == 0 || ilen+2 > sizeof( h->name ) )
     return IPC_ERR( ENAMETOOLONG );
@@ -42,7 +42,7 @@ static int ipc_sem_make_name( char const* s, ipc_sem_handle* h ) {
 static int ipc_sem_create( ipc_sem_handle* h, char const* name,
                            unsigned value ) {
   int rv, flags = O_RDWR|O_CREAT|O_EXCL;
-  rv = ipc_sem_make_name( name, h );
+  rv = ipc_sem_make_name_( name, h );
   if( rv != 0 )
     return IPC_ERR( rv );
 #ifdef O_CLOEXEC
@@ -57,7 +57,7 @@ static int ipc_sem_create( ipc_sem_handle* h, char const* name,
 
 static int ipc_sem_open( ipc_sem_handle* h, char const* name ) {
   int rv, flags = O_RDWR;
-  rv = ipc_sem_make_name( name, h );
+  rv = ipc_sem_make_name_( name, h );
   if( rv != 0 )
     return IPC_ERR( rv );
 #ifdef O_CLOEXEC

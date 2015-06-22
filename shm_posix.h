@@ -34,7 +34,7 @@ static void ipc_shm_error( char* buf, size_t len, int code ) {
 /* the format of shm names is restricted (at least if you want to be
  * portable), so this functions checks the input and makes such a
  * portable name. */
-static int ipc_shm_make_name( char const* s, ipc_shm_handle* h ) {
+static int ipc_shm_make_name_( char const* s, ipc_shm_handle* h ) {
   size_t ilen = strlen( s );
   if( ilen == 0 || ilen+2 > sizeof( h->name ) )
     return IPC_ERR( ENAMETOOLONG );
@@ -49,7 +49,7 @@ static int ipc_shm_make_name( char const* s, ipc_shm_handle* h ) {
 static int ipc_shm_create( ipc_shm_handle* h, char const* name,
                            size_t req ) {
   int fd, rv, flags = O_RDWR|O_CREAT|O_EXCL;
-  rv = ipc_shm_make_name( name, h );
+  rv = ipc_shm_make_name_( name, h );
   if( rv != 0 )
     return IPC_ERR( rv );
   if( req == 0 )
@@ -85,7 +85,7 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
 static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   int fd, rv, flags = O_RDWR;
   struct stat buf;
-  rv = ipc_shm_make_name( name, h );
+  rv = ipc_shm_make_name_( name, h );
   if( rv != 0 )
     return IPC_ERR( rv );
   /* open shared memory object */
