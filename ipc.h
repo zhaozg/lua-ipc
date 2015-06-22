@@ -35,7 +35,14 @@
 
 
 #ifndef NDEBUG
-#  define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, (int)(code) ))
+#  if (defined( __STDC_VERSION__ ) && __STDC_VERSION__  >= 199901L) || \
+      defined( __GNUC__ ) || defined( __clang__ )
+#    define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, __func__, (int)(code) ))
+#  elif defined( _MSC_VER ) && _MSC_VER >= 1100L
+#    define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, __FUNCTION__, (int)(code) ))
+#  else
+#    define IPC_ERR( code ) (ipc_err( __FILE__, __LINE__, NULL, (int)(code) ))
+#  endif
 #else
 #  define IPC_ERR( code ) ((int)(code))
 #endif
@@ -58,7 +65,8 @@ IPC_LOCAL int ipc_getuservaluefield( lua_State* L, int idx,
                                      char const* name );
 IPC_LOCAL void ipc_setuservaluefield( lua_State* L, int idx,
                                       char const* name );
-IPC_LOCAL int ipc_err( char const* file, int line, int code );
+IPC_LOCAL int ipc_err( char const* file, int line, char const* func,
+                       int code );
 
 
 /* compatibility functions for older Lua versions */

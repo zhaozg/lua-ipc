@@ -70,10 +70,15 @@ IPC_LOCAL void ipc_setuservaluefield( lua_State* L, int idx,
 }
 
 
-IPC_LOCAL int ipc_err( char const* file, int line, int code ) {
+IPC_LOCAL int ipc_err( char const* file, int line, char const* func,
+                       int code ) {
   if( code != 0 ) {
-    fprintf( stderr, "[%s:%d]: error return (%d)\n",
-             file, line, code );
+    if( func != NULL )
+      fprintf( stderr, "[%s:%d] error return (%d) in function '%s'\n",
+               file, line, code, func );
+    else
+      fprintf( stderr, "[%s:%d]: error return (%d)\n",
+               file, line, code );
     fflush( stderr );
   }
   return code;
