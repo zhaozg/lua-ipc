@@ -97,7 +97,7 @@ IPC_LOCAL int ipc_absindex( lua_State* L, int idx ) {
 IPC_LOCAL void* ipc_testudata( lua_State* L, int idx,
                                char const* name ) {
   void* p = lua_touserdata( L, idx );
-  if( p == NULL || !lua_getmetatable( L, i ) )
+  if( p == NULL || !lua_getmetatable( L, idx ) )
     return NULL;
   else {
     int res = 0;
