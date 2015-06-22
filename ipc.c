@@ -45,6 +45,31 @@ IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx ) {
 }
 
 
+IPC_LOCAL int ipc_getuservaluefield( lua_State* L, int idx,
+                                     char const* name ) {
+  luaL_checkstack( L, 2, "not enough stack space" );
+  lua_getuservalue( L, idx );
+  if( lua_type( L, -1 ) == LUA_TTABLE )
+    lua_getfield( L, -1, name );
+  else
+    lua_pushnil( L );
+  lua_replace( L, -2 );
+  return lua_type( L, -1 );
+}
+
+
+IPC_LOCAL void ipc_setuservaluefield( lua_State* L, int idx,
+                                      char const* name ) {
+  luaL_checkstack( L, 2, "not enough stack space" );
+  lua_getuservalue( L, idx );
+  if( lua_type( L, -1 ) != LUA_TTABLE )
+    luaL_error( L, "attempt to set field of non-table uservalue" );
+  lua_pushvalue( L, -2 );
+  lua_setfield( L, -2, name );
+  lua_pop( L, 2 );
+}
+
+
 IPC_LOCAL int ipc_err( char const* file, int line, int code ) {
   if( code != 0 ) {
     fprintf( stderr, "[%s:%d]: error return (%d)\n",

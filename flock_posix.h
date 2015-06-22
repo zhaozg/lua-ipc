@@ -28,8 +28,7 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
   fl.l_whence = SEEK_SET;
   fl.l_start = start;
   fl.l_len = len;
-  while( (rv = fcntl( fd, op, &fl )) < 0 && errno == EINTR )
-    ;
+  IPC_EINTR( rv, fcntl( fd, op, &fl ) );
   if( rv < 0 ) {
     if( could_lock != NULL &&
         (errno == EACCES || errno == EAGAIN) ) {

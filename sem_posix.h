@@ -80,8 +80,7 @@ static int ipc_sem_inc( ipc_sem_handle* h ) {
 static int ipc_sem_dec( ipc_sem_handle* h, int* could_dec, unsigned milliseconds ) {
   int rv = 0;
   if( could_dec == NULL ) { /* blocking */
-    while( (rv = sem_wait( h->sem )) < 0 && errno == EINTR )
-      ;
+    IPC_EINTR( rv, sem_wait( h->sem ) );
     if( rv < 0 )
       return IPC_ERR( errno );
   } else if( milliseconds == 0 ) { /* peeking */
@@ -111,8 +110,7 @@ static int ipc_sem_dec( ipc_sem_handle* h, int* could_dec, unsigned milliseconds
       timeout.tv_sec++;
       timeout.tv_nsec -= 1000000000L;
     }
-    while( (rv = sem_timedwait( h->sem, &timeout ) ) < 0 && errno == EINTR )
-      ;
+    IPC_EINTR( rv, sem_timedwait( h->sem, &timeout ) );
     if( rv < 0 ) {
       if( errno == ETIMEDOUT ) {
         *could_dec = 0;

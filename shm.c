@@ -14,7 +14,8 @@
     HAVE_UNISTD_H
 #  include <unistd.h>
 #  if defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200112L && \
-      defined( _POSIX_MAPPED_FILES ) && _POSIX_MAPPED_FILES > 0
+      defined( _POSIX_MAPPED_FILES ) && _POSIX_MAPPED_FILES > 0 && \
+      defined( _POSIX_SHARED_MEMORY_OBJECTS ) && _POSIX_SHARED_MEMORY_OBJECTS > 0
 #    define HAVE_SHM
 #    include "shm_posix.h"
 #  endif

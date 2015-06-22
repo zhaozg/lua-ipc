@@ -46,8 +46,18 @@
               lua_tostring( L, 1 ) )
 
 
+#define IPC_EINTR( _rv, _call ) \
+  do { \
+    _rv = _call; \
+  } while( _rv < 0 && errno == EINTR )
+
+
 IPC_LOCAL FILE* ipc_checkfile( lua_State* L, int idx );
 IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx );
+IPC_LOCAL int ipc_getuservaluefield( lua_State* L, int idx,
+                                     char const* name );
+IPC_LOCAL void ipc_setuservaluefield( lua_State* L, int idx,
+                                      char const* name );
 IPC_LOCAL int ipc_err( char const* file, int line, int code );
 
 

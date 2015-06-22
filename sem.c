@@ -9,7 +9,9 @@
     defined( __TOS_AIX__ ) || defined( __SYSTYPE_BSD ) || \
     HAVE_UNISTD_H
 #  include <unistd.h>
-#  if defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200112L
+#  if defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200112L && \
+   defined( _POSIX_SEMAPHORES ) && _POSIX_SEMAPHORES > 0 && \
+   defined( _POSIX_TIMEOUTS ) && _POSIX_TIMEOUTS > 0
 #    define HAVE_SEM
 #    include "sem_posix.h"
 #  endif
