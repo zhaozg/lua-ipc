@@ -14,6 +14,7 @@ inter-process communication in Lua. It allows you to:
 *   create/manipulate semaphores
 *   memory-map files
 *   lock/unlock (parts of) files
+*   spawn subprocesses and communicate with them using unnamed pipes
 
 The implementation should be portable to Lua 5.1-5.3 on recent Windows
 and POSIX machines (tested on Win 7 and Ubuntu Linux).
@@ -195,6 +196,52 @@ process already holds a lock on the given byte range.
 the same process before.
 
 
+###                            ipc.proc                            ###
+
+```lua
+local proc = require( "ipc.proc" )
+```
+
+On the most common OSes Lua provides the `io.popen()` function to
+spawn a subprocess and capture its output *or* provide its input via
+unnamed pipes. This module can capture `stdout` *and* `stderr`
+simultaneously, while still providing input for the spawned command.
+To avoid deadlocks (and because pipes on Windows are horrible), the
+interface is callback-based.
+
+This module provides the following functions/fields:
+
+*   `proc.spawn( cmd, options ) ==> handle`
+*   `proc.EOF ==> lightuserdata`
+
+Similar to `os.execute()` and `io.popen()`, `proc.spawn()` takes a
+command (`cmd`) as string and runs it using the shell. The `options`
+table specifies the callback function (field `callback`), and which
+streams to redirect via pipes (fields `stdin`, `stdout`, and `stderr`;
+a true value creates a pipe, a false value uses the default streams of
+the parent process -- you can also specify Lua file objects).
+
+A process handle has the following methods:
+
+*   `h:write( ... ) ==> true`
+*   `h:kill( "term"/"kill" ) ==> true`
+*   `h:wait() ==> true/nil, string, number`
+
+`h:write()` accepts strings and enqueues them to be sent to the child
+process' `stdin` stream when it is ready. You may also pass `proc.EOF`
+to close the `stdin` stream when all enqueued output has been sent.
+The `h:kill()` function sends either a `SIGTERM` (requesting graceful
+shutdown) or a `SIGKILL` (for immediate shutdown) to the child
+process. `h:wait()` starts a small blocking event loop that will send
+enqueued data to the child process' `stdin`, read data from the
+child's `stdout`/`stderr` streams, and/or wait for the child process
+to exit. The callback given to the `proc.spawn()` function is called
+with the stream name (`"stdout"` or `"stdin"`) and the received data
+(or the usual error values) when output from the child is available.
+On Lua 5.2+ you may yield from the callback function. Return values of
+`h:wait()` are the same as for `os.execute()` on recent Lua versions.
+
+
 ###                           ipc.strfile                          ###
 
 ```lua
@@ -205,7 +252,7 @@ This module is not about IPC at all. It allows you to create a
 file-like object from a Lua string. It shares most of the code for
 file handling with the `ipc.shm` and `ipc.mmap` modules, and it is
 often useful -- that's why it is here. It has exactly the same methods
-as the shared memory or mmap handles (except you not allowed to
+as the shared memory or mmap handles (except you are not allowed to
 `write`).
 
 The following function is provided:

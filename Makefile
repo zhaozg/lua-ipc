@@ -5,13 +5,13 @@ LUA_INCDIR = /usr/include/lua5.2
 DLL_INSTALL_DIR = /usr/local/lib/lua/5.2
 EXTRALIBS = -lrt
 
-CFLAGS = -Wall -fpic -O2
+CFLAGS = -Wall -fpic -O2 -g
 INCLUDES = -I${LUA_INCDIR}
 LIBFLAG = -shared
 LIB_EXTENSION = so
 
 DLLNAME = ipc.${LIB_EXTENSION}
-SOURCES = ipc.c memfile.c strfile.c shm.c mmap.c sem.c flock.c
+SOURCES = ipc.c memfile.c strfile.c shm.c mmap.c sem.c flock.c proc.c
 OBJECTS = ${SOURCES:%.c=%.o}
 
 all: ${DLLNAME}
@@ -37,4 +37,5 @@ shm.o: shm.c memfile.h ipc.h shm_posix.h shm_win.h Makefile
 mmap.o: mmap.c memfile.h ipc.h mmap_posix.h mmap_win.h Makefile
 sem.o: sem.c ipc.h sem_posix.h sem_win.h Makefile
 flock.o: flock.c ipc.h flock_posix.h flock_win.h Makefile
+proc.o: proc.c ipc.h proc_posix.h proc_win.h Makefile
 
