@@ -48,9 +48,11 @@ static void ipc_proc_inithandle_( ipc_proc_handle* h ) {
 
 
 static int ipc_proc_waitpid_( ipc_proc_handle* h, int flags ) {
+  int rv = 0;
   if( h->exitkind != NULL )
     return 0;
-  switch( waitpid( h->child, &h->exitstatus, flags ) ) {
+  IPC_EINTR( rv, waitpid( h->child, &h->exitstatus, flags ) );
+  switch( rv ) {
     case -1:
       return IPC_ERR( errno );
     case 0:
@@ -91,7 +93,8 @@ static int ipc_proc_wait( ipc_proc_handle* h, int* status,
 
 
 static int ipc_proc_trywrite_( ipc_proc_handle* h, int* done ) {
-  ssize_t nwritten = write( h->fds[ 0 ], h->inbuf, h->inlen );
+  ssize_t nwritten = 0;
+  IPC_EINTR( nwritten, write( h->fds[ 0 ], h->inbuf, h->inlen ) );
   if( nwritten < 0 ) {
     *done = 0;
     if( errno == EAGAIN || errno == EWOULDBLOCK )
