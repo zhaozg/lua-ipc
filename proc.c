@@ -148,6 +148,7 @@ static int startoutput( lua_State* L, l_proc_handle* h, int idx ) {
       lua_setfield( L, -3, "stdinbuf" ); /* env, str */
     }
   }
+  /* check whether we can/should close the pipe now */
   lua_getfield( L, -2, "stdinbuf" ); /* env, str, stdinbuf */
   lua_getfield( L, -3, "iseof" ); /* env, str, stdinbuf, iseof */
   if( lua_type( L, -2 ) == LUA_TNIL && lua_type( L, -1 ) != LUA_TNIL )
@@ -172,13 +173,14 @@ LUA_KFUNCTION( l_proc_waitk ) {
   switch( ctx ) {
     case 0:
       do {
-        /* loop: */
         /* call blocking ipc function to check for readable input or
          * writable output (also checks for dead child) */
         rv = ipc_proc_waitio( &h->h, &child_complete, &stdin_complete,
                               &stdout_complete, &stderr_complete );
         if( rv != 0 )
           return pusherror( L, rv );
+        /* this function may yield, so we have to save all temporary
+         * data in the Lua state. */
         lua_pushboolean( L, child_complete );
         lua_replace( L, 2 );
         lua_pushboolean( L, stdin_complete );
@@ -188,7 +190,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
         lua_pushboolean( L, stderr_complete );
         lua_replace( L, 5 );
         /* call handler function from uservalue */
-        if( lua_toboolean( L, 4 ) /* stdout_complete */ ) {
+        if( lua_toboolean( L, 4 ) ) { /* stdout_complete */
           ipc_getuservaluefield( L, 1, "callback" );
           lua_pushliteral( L, "stdout" );
           rv = ipc_proc_stdoutready( &h->h, &data, &len );
@@ -198,10 +200,10 @@ LUA_KFUNCTION( l_proc_waitk ) {
             lua_pushlstring( L, data, len );
             lua_callk( L, 2, 0, 1, l_proc_waitk );
           } else
-            lua_pop( L, 1 );
+            lua_pop( L, 2 );
         }
     case 1:
-        if( lua_toboolean( L, 5 ) /* stderr_complete */ ) {
+        if( lua_toboolean( L, 5 ) ) { /* stderr_complete */
           ipc_getuservaluefield( L, 1, "callback" );
           lua_pushliteral( L, "stderr" );
           rv = ipc_proc_stderrready( &h->h, &data, &len );
@@ -211,10 +213,10 @@ LUA_KFUNCTION( l_proc_waitk ) {
             lua_pushlstring( L, data, len );
             lua_callk( L, 2, 0, 2, l_proc_waitk );
           } else
-            lua_pop( L, 1 );
+            lua_pop( L, 2 );
         }
     case 2:
-        if( lua_toboolean( L, 2 ) /* child_complete */ ) {
+        if( lua_toboolean( L, 2 ) ) { /* child_complete */
           int stat = 0;
           char const* what = NULL;
           rv = ipc_proc_wait( &h->h, &stat, &what );
@@ -231,7 +233,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
             return 3;
           }
         }
-        if( lua_toboolean( L, 3 ) /* stdin_complete */ ) {
+        if( lua_toboolean( L, 3 ) ) { /* stdin_complete */
           rv = startoutput( L, h, 1 );
           if( rv != 0 )
             return pusherror( L, rv );
@@ -269,7 +271,7 @@ static int l_proc_write( lua_State* L ) {
     else
       luaL_checkstring( L, i );
     if( ipc_getuservaluefield( L, 1, "iseof" ) != LUA_TNIL )
-      luaL_error( L, "pipe to process stdin is already closed" );
+      luaL_error( L, "pipe to stdin is already closed" );
     lua_pop( L, 1 );
     if( got_eof ) {
       lua_pushvalue( L, got_eof );
@@ -279,7 +281,7 @@ static int l_proc_write( lua_State* L ) {
       addtoenv( L, 1, i );
     }
   }
-  /* check whether we are waiting on output already */
+  /* check whether we are waiting already */
   rv = ipc_proc_stdinready( &h->h, &ready );
   if( rv != 0 )
     return pusherror( L, rv );
