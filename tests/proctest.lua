@@ -59,6 +59,11 @@ assert( h:write( "hallo welt,\n", "ich bin da.\n", "hallo welt,\n",
 print( h:wait() )
 
 ___''
+h = assert( proc.spawn( lua_command..' procwork.lua 7', options ) )
+assert( h:kill( "term" ) )
+print( h:wait() )
+
+___''
 local options2 = {
   stdin = assert( io.open( "procwork.lua", "r" ) ),
   stdout = assert( io.open( "out.txt", "w" ) ),
