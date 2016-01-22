@@ -206,8 +206,8 @@ On the most common OSes Lua provides the `io.popen()` function to
 spawn a subprocess and capture its output *or* provide its input via
 unnamed pipes. This module can capture `stdout` *and* `stderr`
 simultaneously, while still providing input for the spawned command.
-To avoid deadlocks (and because pipes on Windows are horrible), the
-interface is callback-based.
+To avoid deadlocks as much as possible and to work around platform
+differences the interface is callback-based.
 
 This module provides the following functions/fields:
 

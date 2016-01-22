@@ -11,7 +11,7 @@
 
 /* check for POSIX */
 #if defined( unix ) || defined( __unix ) || defined( __unix__ ) || \
-    defined( __TOS_AIX__ ) || defined( __SYSTYPE_BSD ) || \
+    (defined( __APPLE__ ) && defined( __MACH__ )) || \
     HAVE_UNISTD_H
 #  include <unistd.h>
 #  if defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200112L && \

@@ -8,7 +8,7 @@
 
 /* check for POSIX */
 #if defined( unix ) || defined( __unix ) || defined( __unix__ ) || \
-    defined( __TOS_AIX__ ) || defined( __SYSTYPE_BSD ) || \
+    (defined( __APPLE__ ) && defined( __MACH__ )) || \
     HAVE_UNISTD_H
 #  include <unistd.h>
 #  if defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200112L
@@ -21,7 +21,7 @@
 /* check for Windows */
 #if !defined( HAVE_PROC ) && \
     defined( _WIN32 ) && !defined( __CYGWIN__ )
-/* #  define HAVE_PROC */
+#  define HAVE_PROC
 #  include "proc_win.h"
 #endif
 
