@@ -1,11 +1,11 @@
 package = "luaipc"
 version = "scm-0"
 source = {
-  url = "${SRCURL}"
+  url = "git://github.com/siffiejoe/lua-luaipc"
 }
 description = {
   summary = "Portable binding for various IPC mechanisms.",
-  homepage = "${HPURL}",
+  homepage = "https://github.com/siffiejoe/lua-luaipc/",
   license = "MIT"
 }
 -- we probably support more, but it lacks testing (and
@@ -59,6 +59,10 @@ build = {
         },
         [ "ipc.filelock" ] = {
           sources = { "flock.c", "ipc.c" },
+          defines = win_defines,
+        },
+        [ "ipc.proc" ] = {
+          sources = { "proc.c", "ipc.c" },
           defines = win_defines,
         },
       }
