@@ -360,6 +360,7 @@ IPC_LOCAL void memfile_new( lua_State* L, void* addr, size_t n,
   memfile* mf = NULL;
   oidx = lua_absindex( L, oidx );
   closeidx = lua_absindex( L, closeidx );
+  flushidx = lua_absindex( L, flushidx );
   mf = lua_newuserdata( L, sizeof( *mf ) );
   mf->addr = addr;
   mf->n = n;
@@ -373,6 +374,10 @@ IPC_LOCAL void memfile_new( lua_State* L, void* addr, size_t n,
   if( closeidx ) {
     lua_pushvalue( L, closeidx );
     lua_rawseti( L, -2, CLOSE_INDEX );
+  }
+  if( flushidx ) {
+    lua_pushvalue(L, flushidx );
+    lua_rawseti( L, -2, FLUSH_INDEX );
   }
   lua_setuservalue( L, -2 );
   if( luaL_newmetatable( L, NAME ) ) {

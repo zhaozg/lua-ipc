@@ -57,7 +57,7 @@ static int l_mmap_close( lua_State* L ) {
   if( !h->is_valid )
     luaL_error( L, "attempt to use invalid mmap object" );
   rv = ipc_mmap_close( &h->h );
-  if( rv !=  0 )
+  if( rv != 0 )
     return pusherror( L, rv );
   h->is_valid = 0;
   lua_pushboolean( L, 1 );

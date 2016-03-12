@@ -39,7 +39,7 @@ install:
 
 # Build (and test?) your project.
 script:
-  - luarocks make CFLAGS="-Wall -Wextra -O2 -fPIC"
+  - luarocks make CFLAGS="-Wall -O2 -fPIC"
   - (cd tests && lua str.lua)
   - (cd tests && lua mmapcat.lua)
   - (cd tests && lua mmaprev.lua)
