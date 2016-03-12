@@ -10,7 +10,7 @@ description = {
 }
 -- we probably support more, but it lacks testing (and
 -- probably the build details are different):
-supported_platforms = { "linux", "windows" }
+supported_platforms = { "linux", "windows", "freebsd" }
 dependencies = {
   "lua >= 5.1, < 5.4",
 }
@@ -36,6 +36,11 @@ build = {
     linux = {
       variables = {
         EXTRALIBS = "-lrt"
+      }
+    },
+    freebsd = {
+      variables = {
+        EXTRALIBS = "-lc"
       }
     },
     windows = {

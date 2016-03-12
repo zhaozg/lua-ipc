@@ -41,7 +41,7 @@ static int ipc_sem_make_name_( char const* s, ipc_sem_handle* h ) {
 
 static int ipc_sem_create( ipc_sem_handle* h, char const* name,
                            unsigned value ) {
-  int rv, flags = O_RDWR|O_CREAT|O_EXCL;
+  int rv, flags = O_CREAT|O_EXCL;
   rv = ipc_sem_make_name_( name, h );
   if( rv != 0 )
     return IPC_ERR( rv );
@@ -56,7 +56,7 @@ static int ipc_sem_create( ipc_sem_handle* h, char const* name,
 
 
 static int ipc_sem_open( ipc_sem_handle* h, char const* name ) {
-  int rv, flags = O_RDWR;
+  int rv, flags = 0;
   rv = ipc_sem_make_name_( name, h );
   if( rv != 0 )
     return IPC_ERR( rv );
