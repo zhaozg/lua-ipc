@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/siffiejoe/lua-luaipc.svg?branch=master)](https://travis-ci.org/siffiejoe/lua-luaipc)
+
 #            LuaIPC -- Inter-Process Communication for Lua           #
 
 ##                           Introduction                           ##
