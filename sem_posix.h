@@ -105,7 +105,7 @@ static int ipc_sem_dec( ipc_sem_handle* h, int* could_dec, unsigned milliseconds
     timeout.tv_nsec = tv.tv_usec * 1000;
 #endif
     timeout.tv_sec += milliseconds / 1000;
-    timeout.tv_nsec += milliseconds % 1000;
+    timeout.tv_nsec += (milliseconds % 1000)*1000000;
     if( timeout.tv_nsec >= 1000000000L ) {
       timeout.tv_sec++;
       timeout.tv_nsec -= 1000000000L;

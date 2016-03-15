@@ -3,6 +3,7 @@
 # works for Lua 5.2 on Debian based Linuxes:
 LUA_INCDIR = /usr/include/lua5.2
 DLL_INSTALL_DIR = /usr/local/lib/lua/5.2
+EXTRAFLAGS = -pthread
 EXTRALIBS = -lrt
 
 CFLAGS = -Wall -fpic -O2 -g
@@ -17,10 +18,10 @@ OBJECTS = ${SOURCES:%.c=%.o}
 all: ${DLLNAME}
 
 ${DLLNAME}: ${OBJECTS}
-	${CC} -pthread ${LIBFLAG} -o $@ ${OBJECTS} ${EXTRALIBS}
+	${CC} ${EXTRAFLAGS} ${LIBFLAG} -o $@ ${OBJECTS} ${EXTRALIBS}
 
 .c.o:
-	${CC} ${CFLAGS} -pthread ${INCLUDES} -c -o $@ $<
+	${CC} ${CFLAGS} ${EXTRAFLAGS} ${INCLUDES} -c -o $@ $<
 
 install: ${DLLNAME}
 	mkdir -p ${DLL_INSTALL_DIR}

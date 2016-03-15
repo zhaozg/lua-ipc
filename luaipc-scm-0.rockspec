@@ -30,11 +30,13 @@ build = {
     CFLAGS = "$(CFLAGS) -DNDEBUG",
     LIBFLAG = "$(LIBFLAG)",
     LIB_EXTENSION = "$(LIB_EXTENSION)",
+    EXTRAFLAGS = "",
     EXTRALIBS = "",
   },
   platforms = {
     linux = {
       variables = {
+        EXTRAFLAGS = "-pthread",
         EXTRALIBS = "-lrt"
       }
     },
