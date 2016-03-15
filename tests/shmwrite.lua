@@ -3,6 +3,7 @@
 package.cpath = "../?.so;../?.dll;"..package.cpath
 local shm = require( "ipc.shm" )
 local fl = require( "ipc.filelock" )
+local socket_ok, socket = pcall( require, "socket" )
 
 local lockfile = assert( io.open( "shm.lck", "w+" ) )
 local function lock()
@@ -12,9 +13,15 @@ local function unlock()
   assert( fl.unlock( lockfile ) )
 end
 
-local function sleep( secs )
-  local start = os.clock()
-  while os.clock() - start < secs do end
+if socket_ok then
+  function sleep( secs )
+    socket.select( nil, nil, secs )
+  end
+else
+  function sleep( secs )
+    local start = os.clock()
+    while os.clock() - start < secs do end
+  end
 end
 
 -- attach to the shared memory segment

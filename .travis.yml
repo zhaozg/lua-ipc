@@ -32,6 +32,7 @@ notifications:
 # Install dependencies (Lua, Luarocks, ...).
 install:
   - . .travis/install.sh
+  - luarocks install luasocket
 
 # Build (and test?) your project.
 script:
@@ -41,4 +42,5 @@ script:
   - (cd tests && lua mmaprev.lua)
   - (cd tests && lua proctest.lua)
   - (cd tests && lua semtest.lua)
+  - (cd tests && lua shmtest.lua)
 

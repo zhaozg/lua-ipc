@@ -3,6 +3,7 @@
 local dirsep = assert( package.config:match( "^([^\n]*)" ) )
 package.cpath = "../?.so;../?.dll;"..package.cpath
 local sem = require( "ipc.sem" )
+local socket_ok, socket = pcall( require, "socket" )
 
 local lua_command, i = arg[ -1 ], -2
 while arg[ i ] ~= nil do
@@ -17,9 +18,15 @@ local function lua_spawn( s )
   end
 end
 
-local function sleep( secs )
-  local start = os.clock()
-  while os.clock()-start < secs do
+if socket_ok then
+  function sleep( secs )
+    socket.select( nil, nil, secs )
+  end
+else
+  function sleep( secs )
+    local start = os.clock()
+    while os.clock()-start < secs do
+    end
   end
 end
 
