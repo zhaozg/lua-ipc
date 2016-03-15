@@ -16,7 +16,7 @@
 #include <sys/types.h>
 
 
-int ipc_sem_timedwait_( sem_t* sem, const struct timespace* abs_timeout );
+int ipc_sem_timedwait_( sem_t* sem, const struct timespec* abs_timeout );
 #define  sem_timedwait  ipc_sem_timedwait_
 
 #include "sem_posix.h"
