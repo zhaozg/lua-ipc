@@ -18,6 +18,16 @@
 #endif
 
 
+/* OSX needs its own code, because it doesn't implement
+ * `sem_timedwait()`! When it does, we'll gladly use the generic
+ * POSIX code above. Until then ... */
+#if !defined( HAVE_SEM ) && \
+    defined( __APPLE__ ) && defined( __MACH__ )
+#  define HAVE_SEM
+#  include "sem_osx.h"
+#endif
+
+
 /* check for Windows */
 #if !defined( HAVE_SEM ) && \
     defined( _WIN32 ) && !defined( __CYGWIN__ )
