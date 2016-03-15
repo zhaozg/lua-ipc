@@ -19,7 +19,7 @@ inter-process communication in Lua. It allows you to:
 *   spawn subprocesses and communicate with them using unnamed pipes
 
 The implementation should be portable to Lua 5.1-5.3 on recent Windows
-and POSIX machines (tested on Win 7 and Ubuntu Linux).
+and POSIX machines (tested on Win 7, Ubuntu Linux, FreeBSD, and OSX).
 
   [1]: http://w3.impa.br/~diego/software/luasocket/
   [2]: http://keplerproject.github.io/luafilesystem/
@@ -271,10 +271,10 @@ Comments and feedback are always welcome.
 
 ##                              License                             ##
 
-`LuaIPC` is *copyrighted free software* distributed under the MIT
+**LuaIPC** is *copyrighted free software* distributed under the MIT
 license (the same license as Lua 5.1). The full license text follows:
 
-    LuaIPC (c) 2015 Philipp Janda
+    LuaIPC (c) 2015, 2016 Philipp Janda
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -294,4 +294,8 @@ license (the same license as Lua 5.1). The full license text follows:
     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+The `sem_timedwait()` implementation used on OSX was written by Keith
+Shortridge at the Australian Astronomical Observatory. See the
+comments in `osx/sem_timedwait.c` for details.
 
