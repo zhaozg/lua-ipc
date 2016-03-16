@@ -61,7 +61,6 @@ static int ipc_shm_make_name_( char const* s, char** name ) {
 static int ipc_shm_create( ipc_shm_handle* h, char const* name,
                            size_t req ) {
   char* rname = NULL;
-  ipc_shm_header header;
   int rv = ipc_shm_make_name_( name, &rname );
   if( rv != 0 )
     return IPC_ERR( rv );
