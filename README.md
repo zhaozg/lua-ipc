@@ -51,10 +51,11 @@ The shared memory segment is deleted automatically when all its
 handles are closed. It is unspecified whether you can still open a
 new handle to an existing shared memory segment once its original
 creator has closed the handle. On some OSes this module might allocate
-more than the requested number of bytes and store meta-information at
-the beginning of the segment. This is transparent for users of this
-module, but it might concern you if you use other modules/programming
-languages to access the shared memory.
+more than the requested number of bytes (usually a multiple of the
+page size). To be portable you have to agree on the real size (e.g.
+by storing it at the beginning of the shared memory segment) and
+adjust the file size that this module uses by calling `h:truncate()`
+for all parties that attached to the shared memory (see below).
 
 The module provides the following functions:
 
@@ -74,10 +75,13 @@ handle has, and additionally:
 
 *   `h:size() ==> bytes`
 *   `h:addr() ==> pointer`
+*   `h:truncate( bytes ) ==> true`
 
 `h:size()` returns the size of the shared memory segment in bytes, and
 `h:addr()` returns the starting address as a lightuserdata. Unless you
-use some form of FFI, this is probably not very useful for you.
+use some form of FFI, this is probably not very useful for you. The
+`h:truncate()` method can tell this module to use less than the
+current shared memory size for its file-like interface.
 
 The file-like methods behave exactly like their Lua file equivalents
 with the following exception: Currently the `"*n"` format specifier of
@@ -154,10 +158,13 @@ and additionally:
 
 *   `h:size() ==> bytes`
 *   `h:addr() ==> pointer`
+*   `h:truncate( bytes ) ==> true`
 
 `h:size()` returns the size of the memory map in bytes, and `h:addr()`
 returns the starting address as a lightuserdata. Unless you use some
-form of FFI, this is probably not very useful for you.
+form of FFI, this is probably not very useful for you. `h:truncate()`
+can shrink the size of the memory mapping, but it's mostly useful for
+the `ipc.shm` module (see there).
 
 The file-like methods behave exactly like their Lua file equivalents
 with the following exception: Currently the `"*n"` format specifier of

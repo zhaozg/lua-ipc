@@ -6,18 +6,8 @@
 #include <windows.h>
 
 
-#define MAGIC "\033luaipc\033"
-
-typedef struct {
-  char magic[ sizeof( MAGIC )-1 ];
-  DWORD hisize;
-  DWORD losize;
-} ipc_shm_header;
-
-
 typedef struct {
   HANDLE h; /* creator handle */
-  void* raddr;
   void* addr;
   size_t len;
 } ipc_shm_handle;
@@ -72,7 +62,6 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
                            size_t req ) {
   char* rname = NULL;
   ipc_shm_header header;
-  size_t rreq = req + sizeof( header );
   int rv = ipc_shm_make_name_( name, &rname );
   if( rv != 0 )
     return IPC_ERR( rv );
@@ -80,16 +69,13 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
     free( rname );
     return IPC_ERR( ERROR_INVALID_PARAMETER );
   }
-  memcpy( header.magic, MAGIC, sizeof( header.magic ) );
-  header.hisize = sizeof( size_t ) > 4 ? ((req >> 16) >> 16) : 0;
-  header.losize = (DWORD)req;
   h->h = CreateFileMappingA( INVALID_HANDLE_VALUE,
                              NULL,
                              PAGE_READWRITE,
                              (DWORD)(sizeof( size_t ) > 4 ?
-                               ((rreq >> 16) >> 16) :
+                               ((req >> 16) >> 16) :
                                0),
-                             (DWORD)rreq,
+                             (DWORD)req,
                              rname );
   if( h->h == NULL ) {
     int saved_errno = GetLastError();
@@ -105,18 +91,16 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   /* Windows automatically handles the lifetime of the shared memory
    * object, so we don't need to keep track of the name! */
   free( rname );
-  h->raddr = MapViewOfFile( h->h,
-                            FILE_MAP_ALL_ACCESS,
-                            0,
-                            0,
-                            0 );
-  if( h->raddr == NULL ) {
+  h->addr = MapViewOfFile( h->h,
+                           FILE_MAP_ALL_ACCESS,
+                           0,
+                           0,
+                           0 );
+  if( h->addr == NULL ) {
     int saved_errno = GetLastError();
     CloseHandle( h->h );
     return IPC_ERR( saved_errno );
   }
-  *(ipc_shm_header*)(h->raddr) = header;
-  h->addr = ((char*)(h->raddr))+sizeof( header );
   h->len = req;
   return 0;
 }
@@ -124,7 +108,7 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
 
 static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
   HANDLE hmap;
-  ipc_shm_header* hptr = NULL;
+  MEMORY_BASIC_INFORMATION meminfo;
   char* rname = NULL;
   int rv = ipc_shm_make_name_( name, &rname );
   if( rv != 0 )
@@ -138,53 +122,36 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
     return IPC_ERR( saved_errno );
   }
   free( rname );
-  h->raddr = MapViewOfFile( hmap,
-                            FILE_MAP_ALL_ACCESS,
-                            0,
-                            0,
-                            0 );
-  if( h->raddr == NULL ) {
+  h->addr = MapViewOfFile( hmap,
+                           FILE_MAP_ALL_ACCESS,
+                           0,
+                           0,
+                           0 );
+  if( h->addr == NULL ) {
     int saved_errno = GetLastError();
     CloseHandle( hmap );
     return IPC_ERR( saved_errno );
   }
   CloseHandle( hmap );
-  hptr = h->raddr;
-  if( memcmp( hptr->magic, MAGIC, sizeof( hptr->magic ) ) == 0 ) {
-    h->len = hptr->losize;
-    if( sizeof( size_t ) > 4 ) {
-      h->len += (((size_t)hptr->hisize) << 16) << 16;
-    } else if( hptr->hisize != 0 ) {
-      UnmapViewOfFile( h->raddr );
-      return IPC_ERR( ERROR_ARITHMETIC_OVERFLOW );
-    }
-    h->addr = ((char*)h->raddr) + sizeof( *hptr );
-  } else {
-    /* There's no header in the shared memory segment. Maybe some
-     * other program/library created it? We can only guess the
-     * approximate size of the segment! */
-    MEMORY_BASIC_INFORMATION meminfo;
-    if( VirtualQuery( h->raddr, &meminfo, sizeof( meminfo ) ) == 0 ) {
-      int saved_errno = GetLastError();
-      UnmapViewOfFile( h->raddr );
-      return IPC_ERR( saved_errno );
-    }
-    h->addr = h->raddr;
-    h->len = meminfo.RegionSize;
+  if( VirtualQuery( h->addr, &meminfo, sizeof( meminfo ) ) == 0 ) {
+    int saved_errno = GetLastError();
+    UnmapViewOfFile( h->addr );
+    return IPC_ERR( saved_errno );
   }
+  h->len = meminfo.RegionSize;
   return 0;
 }
 
 
 static int ipc_shm_detach( ipc_shm_handle* h ) {
-  if( !UnmapViewOfFile( h->raddr ) )
+  if( !UnmapViewOfFile( h->addr ) )
     return IPC_ERR( GetLastError() );
   return 0;
 }
 
 
 static int ipc_shm_remove( ipc_shm_handle* h ) {
-  if( !UnmapViewOfFile( h->raddr ) ) {
+  if( !UnmapViewOfFile( h->addr ) ) {
     int saved_errno = GetLastError();
     CloseHandle( h->h );
     return IPC_ERR( saved_errno );

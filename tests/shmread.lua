@@ -30,7 +30,7 @@ else
 end
 
 -- create the shared memory segment
-local shm = assert( shm.create( "luashm", 200 ) )
+local shm = assert( shm.create( "luashm", 250 ) )
 
 local generation = "0"
 shm:write( generation )

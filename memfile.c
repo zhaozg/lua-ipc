@@ -34,6 +34,7 @@ static int read_all( lua_State* L, memfile* mf ) {
   return LUA_TSTRING;
 }
 
+
 static int read_n( lua_State* L, memfile* mf, size_t n ) {
   if( mf->p == mf->n )
     lua_pushnil( L );
@@ -45,6 +46,7 @@ static int read_n( lua_State* L, memfile* mf, size_t n ) {
   }
   return lua_type( L, -1 );
 }
+
 
 static int read_line( lua_State* L, memfile* mf,
                              int store_nl ) {
@@ -74,6 +76,7 @@ static int read_line( lua_State* L, memfile* mf,
   }
   return lua_type( L, -1 );
 }
+
 
 static int lines_iter( lua_State* L ) {
   memfile* mf = tomemfile( L, lua_upvalueindex( 1 ) );
@@ -305,6 +308,22 @@ static int memfile_size( lua_State* L ) {
 }
 
 
+static int memfile_truncate( lua_State* L ) {
+  memfile* mf = tomemfile( L, 1 );
+  size_t sz = luaL_checkinteger( L, 2 );
+  if( sz > mf->n ) {
+    lua_pushnil( L );
+    lua_pushliteral( L, "new size too large" );
+    return 2;
+  }
+  mf->n = sz;
+  if( mf->p > sz )
+    mf->p = sz;
+  lua_pushboolean( L, 1 );
+  return 1;
+}
+
+
 static int memfile_close( lua_State* L ) {
   memfile* mf = tomemfile( L, 1 );
   int top;
@@ -328,6 +347,7 @@ static int memfile_close( lua_State* L ) {
   lua_setuservalue( L, 1 );
   return lua_gettop( L )-top;
 }
+
 
 static int memfile_gc( lua_State* L ) {
   memfile* mf = lua_touserdata( L, 1 );
@@ -390,6 +410,7 @@ IPC_LOCAL void memfile_new( lua_State* L, void* addr, size_t n,
       { "write", memfile_write },
       { "addr", memfile_addr },
       { "size", memfile_size },
+      { "truncate", memfile_truncate },
       { "close", memfile_close },
       { NULL, NULL }
     };

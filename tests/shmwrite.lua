@@ -26,6 +26,7 @@ end
 
 -- attach to the shared memory segment
 local shm = assert( shm.attach( "luashm" ) )
+shm:truncate( 200 ) -- we "guess" the correct size
 print( shm:addr(), shm:size() )
 
 for i = 1, 3 do
