@@ -41,6 +41,13 @@ static void ipc_mmap_error( char* buf, size_t len, int code ) {
 }
 
 
+static size_t ipc_mmap_pagesize( void ) {
+  SYSTEM_INFO si;
+  GetSystemInfo( &si );
+  return si.dwAllocationGranularity;
+}
+
+
 static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
                           int mode ) {
   HANDLE hfile;

@@ -30,6 +30,14 @@ static void ipc_mmap_error( char* buf, size_t len, int code ) {
 }
 
 
+static size_t ipc_mmap_pagesize( void ) {
+  long result = sysconf( _SC_PAGESIZE );
+  if( result < 1 )
+    result = 4096;
+  return (size_t)result;
+}
+
+
 static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
                           int mode ) {
   int fd, oflags = 0, mmflags = 0;

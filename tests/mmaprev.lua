@@ -5,6 +5,7 @@ local N = 3
 
 package.cpath = "../?.so;../?.dll;"..package.cpath
 local mmap = require( "ipc.mmap" )
+print( "pagesize is", mmap.pagesize )
 
 local function cat( path )
   io.write( "Contents of '", path, "':\n" )

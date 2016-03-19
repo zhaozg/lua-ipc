@@ -123,6 +123,7 @@ static int l_mmap_open( lua_State* L ) {
 IPC_API int luaopen_ipc_mmap( lua_State* L ) {
   luaL_Reg const functions[] = {
     { "open", l_mmap_open },
+    { NULL, NULL }, /* reserve space */
     { NULL, NULL }
   };
   if( !luaL_newmetatable( L, NAME ) )
@@ -131,6 +132,8 @@ IPC_API int luaopen_ipc_mmap( lua_State* L ) {
   lua_setfield( L, -2, "__gc" );
   lua_pop( L, 1 );
   luaL_newlib( L, functions );
+  lua_pushinteger( L, (lua_Integer)ipc_mmap_pagesize() );
+  lua_setfield( L, -2, "pagesize" );
   return 1;
 }
 

@@ -2,6 +2,7 @@
 
 package.cpath = "../?.so;../?.dll;"..package.cpath
 local mmap = require( "ipc.mmap" )
+print( "pagesize is", mmap.pagesize )
 
 -- open the file to mmap
 local mem = assert( mmap.open( "mmapcat.lua", "r" ) )

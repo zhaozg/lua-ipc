@@ -147,11 +147,14 @@ you can't write beyond the initial bounds of the memory-mapped file.
 
 The module provides the following function:
 
+*   `mmap.pagesize`
 *   `mmap.open( filepath [, mode] ) ==> handle`
 
 `mmap.open()` opens the given `filepath` and maps the contents into
 memory. `mode` can be `"r"` (the default), `"w"`, or `"rw"`. On
-success a mmap handle is returned.
+success a mmap handle is returned. Offsets usually must be given in
+multiples of the current pages size (or equivalent). `mmap.pagesize`
+contains this number.
 
 An mmap handle has all the methods that a normal Lua file handle has,
 and additionally:
