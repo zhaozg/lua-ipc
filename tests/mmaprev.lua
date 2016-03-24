@@ -19,6 +19,7 @@ end
 
 -- create a new file
 local f = assert( io.open( FILE, "wb" ) )
+f:write( (" "):rep( mmap.pagesize ) )
 for i = 1, N do
   f:write( "0123456789" )
 end
@@ -29,7 +30,8 @@ f:close()
 cat( FILE )
 
 -- open the file to mmap
-local mem = assert( mmap.open( FILE, "w" ) )
+local mem = assert( mmap.open( FILE, "w", mmap.pagesize ) )
+print( "pointer:", mem:addr(), "size:", mem:size() )
 -- modify the contents
 for i = 1, N do
   mem:write( "9876543210" )

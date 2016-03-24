@@ -98,12 +98,14 @@ static int l_mmap_open( lua_State* L ) {
   };
   char const* name = luaL_checkstring( L, 1 );
   int mode = modes[ luaL_checkoption( L, 2, "r", modenames ) ];
+  size_t offset = luaL_optinteger( L, 3, 0 );
+  size_t size = luaL_optinteger( L, 4, 0 );
   l_mmap_handle* h = lua_newuserdata( L, sizeof( *h ) );
   int rv = 0;
   h->is_valid = 0;
   luaL_getmetatable( L, NAME );
   lua_setmetatable( L, -2 );
-  rv = ipc_mmap_open( &h->h, name, mode );
+  rv = ipc_mmap_open( &h->h, name, mode, offset, size );
   if( rv != 0 )
     return pusherror( L, rv );
   h->is_valid = 1;

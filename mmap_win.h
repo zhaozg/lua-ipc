@@ -49,13 +49,15 @@ static size_t ipc_mmap_pagesize( void ) {
 
 
 static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
-                          int mode ) {
+                          int mode, size_t offset, size_t size  ) {
   HANDLE hfile;
   HANDLE hmap;
   LARGE_INTEGER fsize;
   int cfflags = 0;
   int fmflags = 0;
   int mvflags = 0;
+  (void)offset;
+  (void)size;
   /* figure out the open flags */
   if( mode & MEMFILE_W ) {
     cfflags = GENERIC_READ | GENERIC_WRITE;
