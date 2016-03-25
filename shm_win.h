@@ -71,9 +71,7 @@ static int ipc_shm_create( ipc_shm_handle* h, char const* name,
   h->h = CreateFileMappingA( INVALID_HANDLE_VALUE,
                              NULL,
                              PAGE_READWRITE,
-                             (DWORD)(sizeof( size_t ) > 4 ?
-                               ((req >> 16) >> 16) :
-                               0),
+                             (DWORD)((req >> 16) >> 16),
                              (DWORD)req,
                              rname );
   if( h->h == NULL ) {

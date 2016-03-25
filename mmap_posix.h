@@ -42,7 +42,6 @@ static size_t ipc_mmap_pagesize( void ) {
 static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
                           int mode, size_t offset, size_t size ) {
   int fd, oflags = 0, mmflags = 0;
-  struct stat buf;
   if( (mode & MEMFILE_RW) == MEMFILE_RW ) {
     oflags = O_RDWR;
     mmflags = PROT_READ | PROT_WRITE;
@@ -64,6 +63,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
     return IPC_ERR( errno );
   h->len = size;
   if( size == 0 ) { /* figure out its size */
+    struct stat buf;
     if( fstat( fd, &buf ) < 0 ) {
       int saved_errno = errno;
       close( fd );

@@ -52,12 +52,10 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
                           int mode, size_t offset, size_t size  ) {
   HANDLE hfile;
   HANDLE hmap;
-  LARGE_INTEGER fsize;
+  ULONGLONG msize;
   int cfflags = 0;
   int fmflags = 0;
   int mvflags = 0;
-  (void)offset;
-  (void)size;
   /* figure out the open flags */
   if( mode & MEMFILE_W ) {
     cfflags = GENERIC_READ | GENERIC_WRITE;
@@ -79,23 +77,27 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
                        NULL );
   if( hfile == INVALID_HANDLE_VALUE )
     return IPC_ERR( GetLastError() );
-  /* figure out the size of the file */
-  if( !GetFileSizeEx( hfile, &fsize ) ) {
-    int saved_errno = GetLastError();
-    CloseHandle( hfile );
-    return IPC_ERR( saved_errno );
+  h->len = size;
+  if( size == 0 ) { /* figure out its size */
+    LARGE_INTEGER fsize;
+    if( !GetFileSizeEx( hfile, &fsize ) ) {
+      int saved_errno = GetLastError();
+      CloseHandle( hfile );
+      return IPC_ERR( saved_errno );
+    }
+    if( fsize.QuadPart - offset > ~((size_t)0) ) {
+      CloseHandle( hfile );
+      return IPC_ERR( ERROR_ARITHMETIC_OVERFLOW );
+    }
+    h->len = fsize.QuadPart - offset;
   }
-  if( fsize.QuadPart > ~((size_t)0) ) {
-    CloseHandle( hfile );
-    return IPC_ERR( ERROR_ARITHMETIC_OVERFLOW );
-  }
-  h->len = (size_t)fsize.QuadPart;
+  msize = (ULONGLONG)h->len + offset;
   /* create the anonymous file mapping */
   hmap = CreateFileMappingA( hfile,
                              NULL,
                              fmflags,
-                             0,
-                             0,
+                             (DWORD)(msize >> 32),
+                             (DWORD)msize,
                              NULL );
   if( hmap == NULL ) {
     int saved_errno = GetLastError();
@@ -105,8 +107,8 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
   /* get an address for the file mapping */
   h->addr = MapViewOfFile( hmap,
                            mvflags,
-                           0,
-                           0,
+                           (DWORD)((offset >> 16) >> 16),
+                           (DWORD)offset,
                            0 );
   if( h->addr == NULL ) {
     int saved_errno = GetLastError();
