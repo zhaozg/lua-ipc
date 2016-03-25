@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200112L
+#ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 200112L
+#endif
 #ifndef _FILE_OFFSET_BITS
 #  define _LARGEFILE_SOURCE 1
 #  define _FILE_OFFSET_BITS 64
@@ -8,6 +10,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include "ipc.h"
+
 
 /* check for POSIX */
 #if defined( unix ) || defined( __unix ) || defined( __unix__ ) || \
@@ -60,8 +63,8 @@ static int l_flock_lock( lua_State* L ) {
   static char const* const mnames[] = { "r", "w", "rw", NULL };
   static int const modes[] = { 0, 1, 1 };
   int is_wlock = modes[ luaL_checkoption( L, 2, "rw", mnames ) ];
-  ipc_flock_off_t start = (ipc_flock_off_t)luaL_optinteger( L, 3, 0 );
-  ipc_flock_off_t len = (ipc_flock_off_t)luaL_optinteger( L, 4, 0 );
+  ipc_flock_off_t start = IPC_OPTBIGINT( ipc_flock_off_t, L, 3, 0 );
+  ipc_flock_off_t len = IPC_OPTBIGINT( ipc_flock_off_t, L, 4, 0 );
   int rv = ipc_flock_lock( f, is_wlock, NULL, start, len );
   if( rv != 0 )
     return pusherror( L, rv );
@@ -77,8 +80,8 @@ static int l_flock_trylock( lua_State* L ) {
   static char const* const mnames[] = { "r", "w", "rw", NULL };
   static int const modes[] = { 0, 1, 1 };
   int is_wlock = modes[ luaL_checkoption( L, 2, "rw", mnames ) ];
-  ipc_flock_off_t start = (ipc_flock_off_t)luaL_optinteger( L, 3, 0 );
-  ipc_flock_off_t len = (ipc_flock_off_t)luaL_optinteger( L, 4, 0 );
+  ipc_flock_off_t start = IPC_OPTBIGINT( ipc_flock_off_t, L, 3, 0 );
+  ipc_flock_off_t len = IPC_OPTBIGINT( ipc_flock_off_t, L, 4, 0 );
   int could_lock = 0;
   int rv = ipc_flock_lock( f, is_wlock, &could_lock, start, len );
   if( rv != 0 )

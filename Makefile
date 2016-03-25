@@ -3,7 +3,7 @@
 # works for Lua 5.2 on Debian based Linuxes:
 LUA_INCDIR = /usr/include/lua5.2
 DLL_INSTALL_DIR = /usr/local/lib/lua/5.2
-EXTRAFLAGS = -pthread -D_GNU_SOURCE
+EXTRAFLAGS = -D_POSIX_C_SOURCE=200809L -pthread
 EXTRALIBS = -lrt
 
 CFLAGS = -Wall -fpic -O2 -g

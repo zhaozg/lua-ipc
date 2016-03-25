@@ -6,6 +6,9 @@
 #include <windows.h>
 
 
+typedef ULONGLONG ipc_mmap_off_t;
+
+
 typedef struct {
   void* addr;
   size_t len;
@@ -49,7 +52,7 @@ static size_t ipc_mmap_pagesize( void ) {
 
 
 static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
-                          int mode, size_t offset, size_t size  ) {
+                          int mode, ULONGLONG offset, size_t size  ) {
   HANDLE hfile;
   HANDLE hmap;
   ULONGLONG msize;
@@ -85,11 +88,14 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
       CloseHandle( hfile );
       return IPC_ERR( saved_errno );
     }
-    if( fsize.QuadPart - offset > ~((size_t)0) ) {
+    if( fsize.QuadPart < offset ) {
       CloseHandle( hfile );
-      return IPC_ERR( ERROR_ARITHMETIC_OVERFLOW );
+      return IPC_ERR( ERROR_INVALID_PARAMETER );
     }
-    h->len = fsize.QuadPart - offset;
+    if( fsize.QuadPart - offset > (size_t)-1 )
+      h->len = (size_t)-1;
+    else
+      h->len = fsize.QuadPart - offset;
   }
   msize = (ULONGLONG)h->len + offset;
   /* create the anonymous file mapping */
@@ -107,7 +113,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
   /* get an address for the file mapping */
   h->addr = MapViewOfFile( hmap,
                            mvflags,
-                           (DWORD)((offset >> 16) >> 16),
+                           (DWORD)(offset >> 32),
                            (DWORD)offset,
                            0 );
   if( h->addr == NULL ) {

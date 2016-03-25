@@ -8,10 +8,7 @@
 #include <io.h>
 
 
-/* Windows definitely can handle 64 bit values, but choosing a
- * portable type name is difficult and maybe Lua uses a 32 bit
- * type anyway. */
-typedef lua_Integer ipc_flock_off_t;
+typedef ULONGLONG ipc_flock_off_t;
 
 
 static void ipc_flock_error( char* buf, size_t len, int code ) {
@@ -40,7 +37,7 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
                            ipc_flock_off_t len ) {
   HANDLE fh = (HANDLE)_get_osfhandle( _fileno( f ) );
   DWORD flags = is_wlock ? LOCKFILE_EXCLUSIVE_LOCK : 0;
-  DWORD lenlo, lenhi;
+  DWORD lenlo = (DWORD)len, lenhi = (DWORD)(len >> 32);
   OVERLAPPED ov;
   if( fh == (HANDLE)INVALID_HANDLE_VALUE )
     return IPC_ERR( ERROR_INVALID_HANDLE );
@@ -48,14 +45,8 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
     flags |= LOCKFILE_FAIL_IMMEDIATELY;
   if( start < 0 || len < 0 )
     return IPC_ERR( ERROR_INVALID_PARAMETER );
-  lenlo = (DWORD)len;
-  lenhi = 0;
   ov.Offset = (DWORD)start;
-  ov.OffsetHigh = 0;
-  if( sizeof( ipc_flock_off_t ) > 4 ) {
-    ov.OffsetHigh = (DWORD)((start >> 16) >> 16);
-    lenhi = (DWORD)((len >> 16) >> 16);
-  }
+  ov.OffsetHigh = (DWORD)(start >> 32);
   ov.hEvent = NULL;
   if( len == 0 )
     lenhi = lenlo = (DWORD)-1;
@@ -77,20 +68,10 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
 static int ipc_flock_unlock( FILE* f, ipc_flock_off_t start,
                              ipc_flock_off_t len ) {
   HANDLE fh = (HANDLE)_get_osfhandle( _fileno( f ) );
-  DWORD lenlo, lenhi;
-  DWORD offlo, offhi;
+  DWORD lenlo = (DWORD)len, lenhi = (DWORD)(len >> 32);
+  DWORD offlo = (DWORD)start, offhi = (DWORD)(start >> 32);
   if( fh == (HANDLE)INVALID_HANDLE_VALUE )
     return IPC_ERR( ERROR_INVALID_HANDLE );
-  if( start < 0 || len < 0 )
-    return IPC_ERR( ERROR_INVALID_PARAMETER );
-  offlo = (DWORD)start;
-  offhi = 0;
-  lenlo = (DWORD)len;
-  lenhi = 0;
-  if( sizeof( ipc_flock_off_t ) > 4 ) {
-    offhi = (DWORD)((start >> 16) >> 16);
-    lenhi = (DWORD)((len >> 16) >> 16);
-  }
   if( len == 0 )
     lenhi = lenlo = (DWORD)-1;
   if( !UnlockFile( fh, offlo, offhi, lenlo, lenhi ) )

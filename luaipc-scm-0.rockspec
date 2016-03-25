@@ -36,7 +36,7 @@ build = {
   platforms = {
     linux = {
       variables = {
-        EXTRAFLAGS = "-pthread -D_GNU_SOURCE",
+        EXTRAFLAGS = "-D_POSIX_C_SOURCE=200809L -pthread",
         EXTRALIBS = "-lrt"
       }
     },

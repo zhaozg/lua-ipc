@@ -9,6 +9,9 @@
 #include <fcntl.h>
 
 
+typedef off_t ipc_mmap_off_t;
+
+
 typedef struct {
   void* addr;
   size_t len;
@@ -40,7 +43,7 @@ static size_t ipc_mmap_pagesize( void ) {
 
 
 static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
-                          int mode, size_t offset, size_t size ) {
+                          int mode, off_t offset, size_t size ) {
   int fd, oflags = 0, mmflags = 0;
   if( (mode & MEMFILE_RW) == MEMFILE_RW ) {
     oflags = O_RDWR;
@@ -55,9 +58,6 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
 #ifdef O_CLOEXEC
   oflags |= O_CLOEXEC;
 #endif
-  if( sizeof( off_t ) <= sizeof( size_t ) &&
-      offset > ~(~((size_t)0) << (CHAR_BIT*sizeof(off_t)-1)) )
-    return IPC_ERR( EINVAL );
   fd = open( name, oflags );
   if( fd < 0 )
     return IPC_ERR( errno );
@@ -69,14 +69,17 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
       close( fd );
       return IPC_ERR( saved_errno );
     }
-    if( buf.st_size - offset > ~((size_t)0) ) {
+    if( buf.st_size < offset ) {
       close( fd );
-      return IPC_ERR( EFBIG );
+      return IPC_ERR( EINVAL );
     }
-    h->len = buf.st_size - offset;
+    if( buf.st_size - offset > (size_t)-1 )
+      h->len = (size_t)-1;
+    else
+      h->len = buf.st_size - offset;
   }
   /* create mmap */
-  h->addr = mmap( NULL, h->len, mmflags, MAP_SHARED, fd, (off_t)offset );
+  h->addr = mmap( NULL, h->len, mmflags, MAP_SHARED, fd, offset );
   if( h->addr == MAP_FAILED ) {
     int saved_errno = errno;
     close( fd );

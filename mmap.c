@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200112L
+#ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 200112L
+#endif
 #ifndef _FILE_OFFSET_BITS
 #  define _LARGEFILE_SOURCE 1
 #  define _FILE_OFFSET_BITS 64
@@ -8,6 +10,7 @@
 #include <lauxlib.h>
 #include "ipc.h"
 #include "memfile.h"
+
 
 /* check for POSIX */
 #if defined( unix ) || defined( __unix ) || defined( __unix__ ) || \
@@ -98,7 +101,7 @@ static int l_mmap_open( lua_State* L ) {
   };
   char const* name = luaL_checkstring( L, 1 );
   int mode = modes[ luaL_checkoption( L, 2, "r", modenames ) ];
-  size_t offset = luaL_optinteger( L, 3, 0 );
+  ipc_mmap_off_t offset = IPC_OPTBIGINT( ipc_mmap_off_t, L, 3, 0 );
   size_t size = luaL_optinteger( L, 4, 0 );
   l_mmap_handle* h = lua_newuserdata( L, sizeof( *h ) );
   int rv = 0;

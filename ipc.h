@@ -59,6 +59,12 @@
   } while( _rv < 0 && errno == EINTR )
 
 
+#define IPC_OPTBIGINT( _t, _l, _i, _d ) \
+  ((sizeof( _t ) > sizeof( lua_Integer )) \
+    ? (_t)luaL_optnumber( _l, _i, _d ) \
+    : (_t)luaL_optinteger( _l, _i, _d ))
+
+
 IPC_LOCAL FILE* ipc_checkfile( lua_State* L, int idx );
 IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx );
 IPC_LOCAL int ipc_getuservaluefield( lua_State* L, int idx,

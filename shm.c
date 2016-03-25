@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 200112L
+#ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 200112L
+#endif
 #ifndef _FILE_OFFSET_BITS
 #  define _LARGEFILE_SOURCE 1
 #  define _FILE_OFFSET_BITS 64
@@ -7,6 +9,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include "memfile.h"
+
 
 /* check for POSIX */
 #if defined( unix ) || defined( __unix ) || defined( __unix__ ) || \

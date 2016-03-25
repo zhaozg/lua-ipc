@@ -4,6 +4,7 @@
 #include "ipc.h"
 #include "memfile.h"
 
+
 static int str_open( lua_State* L ) {
   size_t len = 0;
   char const* str = luaL_checklstring( L, 1, &len );

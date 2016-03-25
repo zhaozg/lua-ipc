@@ -101,7 +101,7 @@ static int ipc_shm_attach( ipc_shm_handle* h, char const* name ) {
     close( fd );
     return IPC_ERR( saved_errno );
   }
-  if( buf.st_size > ~((size_t)0) ) {
+  if( buf.st_size > (size_t)-1 ) {
     close( fd );
     return IPC_ERR( EFBIG );
   }
