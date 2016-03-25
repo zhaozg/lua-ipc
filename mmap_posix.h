@@ -53,7 +53,7 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
     mmflags = PROT_WRITE;
   }
 #ifdef O_CLOEXEC
-  flags |= O_CLOEXEC;
+  oflags |= O_CLOEXEC;
 #endif
   if( sizeof( off_t ) <= sizeof( size_t ) &&
       offset > ~(~((size_t)0) << (CHAR_BIT*sizeof(off_t)-1)) )

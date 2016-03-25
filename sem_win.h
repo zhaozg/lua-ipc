@@ -136,7 +136,7 @@ static int ipc_sem_close( ipc_sem_handle* h ) {
 
 static int ipc_sem_remove( ipc_sem_handle* h ) {
   /* Windows automatically removes a semaphore object when all
-   * processes referencing  it are destroyed (or when all handles are
+   * processes referencing it are destroyed (or when all handles are
    * closed?). */
   return IPC_ERR( ipc_sem_close( h ) );
 }
