@@ -60,7 +60,8 @@
 
 
 #define IPC_OPTBIGINT( _t, _l, _i, _d ) \
-  ((sizeof( _t ) > sizeof( lua_Integer )) \
+  ((sizeof( _t ) > sizeof( lua_Integer ) && \
+    sizeof( lua_Number ) > sizeof( lua_Integer )) \
     ? (_t)luaL_optnumber( _l, _i, _d ) \
     : (_t)luaL_optinteger( _l, _i, _d ))
 
