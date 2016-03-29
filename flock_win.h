@@ -42,8 +42,6 @@ static int ipc_flock_lock( FILE* f, int is_wlock, int* could_lock,
     return IPC_ERR( ERROR_INVALID_HANDLE );
   if( could_lock != NULL )
     flags |= LOCKFILE_FAIL_IMMEDIATELY;
-  if( start < 0 || len < 0 )
-    return IPC_ERR( ERROR_INVALID_PARAMETER );
   ov.Offset = (DWORD)start;
   ov.OffsetHigh = (DWORD)(start >> 32);
   ov.hEvent = NULL;
