@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <lua.h> /* we need the definition of lua_Integer */
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <io.h>
