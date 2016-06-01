@@ -15,12 +15,6 @@ dependencies = {
   "lua >= 5.1, < 5.4",
 }
 
-local win_defines = {
-  "IPC_API=__declspec(dllexport)",
---  "NDEBUG",
-  "_CRT_SECURE_NO_WARNINGS",
-}
-
 build = {
   type = "make",
   variables = {
@@ -48,30 +42,17 @@ build = {
     windows = {
       type = "builtin",
       modules = {
-        [ "ipc.strfile" ] = {
-          sources = { "strfile.c", "memfile.c", "ipc.c" },
-          defines = win_defines,
-        },
-        [ "ipc.shm" ] = {
-          sources = { "shm.c", "memfile.c", "ipc.c" },
-          defines = win_defines,
-        },
-        [ "ipc.mmap" ] = {
-          sources = { "mmap.c", "memfile.c", "ipc.c" },
-          defines = win_defines,
-        },
-        [ "ipc.sem" ] = {
-          sources = { "sem.c", "ipc.c" },
-          defines = win_defines,
-        },
-        [ "ipc.filelock" ] = {
-          sources = { "flock.c", "ipc.c" },
-          defines = win_defines,
-        },
-        [ "ipc.proc" ] = {
-          sources = { "proc.c", "ipc.c" },
-          defines = win_defines,
-        },
+        ipc = {
+          sources = {
+            "ipc.c", "memfile.c", "strfile.c", "shm.c",
+            "mmap.c", "sem.c", "flock.c", "proc.c",
+          },
+          defines = {
+            "IPC_API=__declspec(dllexport)",
+            --"NDEBUG",
+            "_CRT_SECURE_NO_WARNINGS",
+          },
+        }
       }
     }
   }
