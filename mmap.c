@@ -44,7 +44,7 @@ typedef struct {
 } l_mmap_handle;
 
 
-static int pusherror( lua_State* L, int code ) {
+static int l_mmap_pusherror( lua_State* L, int code ) {
   char buf[ IPC_MAXERRMSG ];
   ipc_mmap_error( buf, sizeof( buf ), code );
   lua_pushnil( L );
@@ -61,7 +61,7 @@ static int l_mmap_close( lua_State* L ) {
     luaL_error( L, "attempt to use invalid mmap object" );
   rv = ipc_mmap_close( &h->h );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_mmap_pusherror( L, rv );
   h->is_valid = 0;
   lua_pushboolean( L, 1 );
   return 1;
@@ -85,7 +85,7 @@ static int l_mmap_flush( lua_State* L ) {
     luaL_error( L, "attempt to use invalid mmap object" );
   rv = ipc_mmap_flush( &h->h, pos );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_mmap_pusherror( L, rv );
   lua_pushboolean( L, 1 );
   return 1;
 }
@@ -110,7 +110,7 @@ static int l_mmap_open( lua_State* L ) {
   lua_setmetatable( L, -2 );
   rv = ipc_mmap_open( &h->h, name, mode, offset, size );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_mmap_pusherror( L, rv );
   h->is_valid = 1;
   lua_pushcfunction( L, l_mmap_close );
 #ifdef IPC_MMAP_HAVE_FLUSH
@@ -141,6 +141,7 @@ IPC_API int luaopen_ipc_mmap( lua_State* L ) {
   lua_setfield( L, -2, "pagesize" );
   return 1;
 }
+#undef NAME
 
 #else /* no implementation for this platform available: */
 IPC_API int luaopen_ipc_mmap( lua_State* L ) {

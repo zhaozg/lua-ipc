@@ -45,7 +45,7 @@ typedef struct {
 } l_proc_handle;
 
 
-static int pusherror( lua_State* L, int code ) {
+static int l_proc_pusherror( lua_State* L, int code ) {
   char buf[ IPC_MAXERRMSG ];
   ipc_proc_error( buf, sizeof( buf ), code );
   lua_pushnil( L );
@@ -81,7 +81,7 @@ static int l_proc_kill( lua_State* L ) {
     luaL_error( L, "attempt to use invalid process object" );
   rv = ipc_proc_kill( &h->h, sig );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_proc_pusherror( L, rv );
   lua_pushboolean( L, 1 );
   return 1;
 }
@@ -180,7 +180,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
         rv = ipc_proc_waitio( &h->h, &child_complete, &stdin_complete,
                               &stdout_complete, &stderr_complete );
         if( rv != 0 )
-          return pusherror( L, rv );
+          return l_proc_pusherror( L, rv );
         /* this function may yield, so we have to save all temporary
          * data in the Lua state. */
         lua_pushboolean( L, child_complete );
@@ -197,7 +197,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
           lua_pushliteral( L, "stdout" );
           rv = ipc_proc_stdoutready( &h->h, &data, &len );
           if( rv != 0 ) {
-            lua_callk( L, pusherror( L, rv )+1, 0, 1, l_proc_waitk );
+            lua_callk( L, l_proc_pusherror( L, rv )+1, 0, 1, l_proc_waitk );
           } else if( len > 0 ) {
             lua_pushlstring( L, data, len );
             lua_callk( L, 2, 0, 1, l_proc_waitk );
@@ -210,7 +210,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
           lua_pushliteral( L, "stderr" );
           rv = ipc_proc_stderrready( &h->h, &data, &len );
           if( rv != 0 ) {
-            lua_callk( L, pusherror( L, rv )+1, 0, 2, l_proc_waitk );
+            lua_callk( L, l_proc_pusherror( L, rv )+1, 0, 2, l_proc_waitk );
           } else if( len > 0 ) {
             lua_pushlstring( L, data, len );
             lua_callk( L, 2, 0, 2, l_proc_waitk );
@@ -224,7 +224,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
           rv = ipc_proc_wait( &h->h, &stat, &what );
           h->is_valid = 0;
           if( rv != 0 )
-            return pusherror( L, rv );
+            return l_proc_pusherror( L, rv );
           else {
             if( stat == 0 && *what == 'e' )
               lua_pushboolean( L, 1 );
@@ -238,7 +238,7 @@ LUA_KFUNCTION( l_proc_waitk ) {
         if( lua_toboolean( L, 3 ) ) { /* stdin_complete */
           rv = startoutput( L, h, 1 );
           if( rv != 0 )
-            return pusherror( L, rv );
+            return l_proc_pusherror( L, rv );
         }
       } while( 1 );
   }
@@ -286,12 +286,12 @@ static int l_proc_write( lua_State* L ) {
   /* check whether we are waiting already */
   rv = ipc_proc_stdinready( &h->h, &ready );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_proc_pusherror( L, rv );
   /* if not, start asynchronous output to child process */
   if( ready ) {
     rv = startoutput( L, h, 1 );
     if( rv != 0 )
-      return pusherror( L, rv );
+      return l_proc_pusherror( L, rv );
   }
   lua_pushboolean( L, 1 );
   return 1;
@@ -342,7 +342,7 @@ static int l_proc_spawn( lua_State* L ) {
   rv = ipc_proc_spawn( &h->h, cmdline, cstdin, pipe_stdin,
                        cstdout, pipe_stdout, cstderr, pipe_stderr );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_proc_pusherror( L, rv );
   h->is_valid = 1;
   return 1;
 }
@@ -380,6 +380,7 @@ IPC_API int luaopen_ipc_proc( lua_State* L ) {
   lua_setfield( L, -2, "EOF" );
   return 1;
 }
+#undef NAME
 
 #else /* no implementation for this platform available: */
 IPC_API int luaopen_ipc_proc( lua_State* L ) {

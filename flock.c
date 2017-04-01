@@ -34,7 +34,7 @@
 
 #ifdef HAVE_FLOCK
 
-static int pusherror( lua_State* L, int code ) {
+static int l_flock_pusherror( lua_State* L, int code ) {
   char buf[ IPC_MAXERRMSG ];
   ipc_flock_error( buf, sizeof( buf ), code );
   lua_pushnil( L );
@@ -67,7 +67,7 @@ static int l_flock_lock( lua_State* L ) {
   ipc_flock_off_t len = IPC_OPTBIGINT( ipc_flock_off_t, L, 4, 0 );
   int rv = ipc_flock_lock( f, is_wlock, NULL, start, len );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_flock_pusherror( L, rv );
   /* try to flush input buffer */
   invalidate_input_buffer( f );
   lua_pushboolean( L, 1 );
@@ -85,7 +85,7 @@ static int l_flock_trylock( lua_State* L ) {
   int could_lock = 0;
   int rv = ipc_flock_lock( f, is_wlock, &could_lock, start, len );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_flock_pusherror( L, rv );
   if( could_lock ) /* try to flush input buffer */
     invalidate_input_buffer( f );
   lua_pushboolean( L, could_lock );
@@ -101,7 +101,7 @@ static int l_flock_unlock( lua_State* L ) {
   fflush( f ); /* flush output buffer */
   rv = ipc_flock_unlock( f, start, len );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_flock_pusherror( L, rv );
   lua_pushboolean( L, 1 );
   return 1;
 }

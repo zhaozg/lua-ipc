@@ -424,3 +424,4 @@ IPC_LOCAL void memfile_new( lua_State* L, void* addr, size_t n,
   lua_setmetatable( L, -2 );
 }
 
+#undef NAME

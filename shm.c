@@ -47,7 +47,7 @@ typedef struct {
 } l_shm_handle;
 
 
-static int pusherror( lua_State* L, int code ) {
+static int l_shm_pusherror( lua_State* L, int code ) {
   char buf[ IPC_MAXERRMSG ];
   ipc_shm_error( buf, sizeof( buf ), code );
   lua_pushnil( L );
@@ -67,7 +67,7 @@ static int l_shm_close( lua_State* L ) {
   else
     rv = ipc_shm_detach( &h->h );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_shm_pusherror( L, rv );
   h->is_valid = 0;
   lua_pushboolean( L, 1 );
   return 1;
@@ -98,7 +98,7 @@ static int l_shm_create( lua_State* L ) {
   lua_setmetatable( L, -2 );
   rv = ipc_shm_create( &h->h, name, req );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_shm_pusherror( L, rv );
   h->is_valid = 1;
   lua_pushcfunction( L, l_shm_close );
   memfile_new( L, ipc_shm_addr( &h->h ), ipc_shm_size( &h->h ),
@@ -117,7 +117,7 @@ static int l_shm_attach( lua_State* L ) {
   lua_setmetatable( L, -2 );
   rv = ipc_shm_attach( &h->h, name );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_shm_pusherror( L, rv );
   h->is_valid = 1;
   lua_pushcfunction( L, l_shm_close );
   memfile_new( L, ipc_shm_addr( &h->h ), ipc_shm_size( &h->h ),
@@ -140,6 +140,7 @@ IPC_API int luaopen_ipc_shm( lua_State* L ) {
   luaL_newlib( L, functions );
   return 1;
 }
+#undef NAME
 
 #else /* no implementation for this platform available: */
 IPC_API int luaopen_ipc_shm( lua_State* L ) {

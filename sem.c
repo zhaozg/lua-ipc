@@ -51,7 +51,7 @@ typedef struct {
 } l_sem_handle;
 
 
-static int pusherror( lua_State* L, int code ) {
+static int l_sem_pusherror( lua_State* L, int code ) {
   char buf[ IPC_MAXERRMSG ];
   ipc_sem_error( buf, sizeof( buf ), code );
   lua_pushnil( L );
@@ -71,7 +71,7 @@ static int l_sem_close( lua_State* L ) {
   else
     rv = ipc_sem_close( &h->h );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_sem_pusherror( L, rv );
   h->is_valid = 0;
   lua_pushboolean( L, 1 );
   return 1;
@@ -104,7 +104,7 @@ static int l_sem_open( lua_State* L ) {
   else
     rv = ipc_sem_open( &h->h, name );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_sem_pusherror( L, rv );
   if( value != 0 )
     h->is_owner = 1;
   h->is_valid = 1;
@@ -119,7 +119,7 @@ static int l_sem_dec( lua_State* L ) {
   int rv = ipc_sem_dec( &h->h, msec >= 0 ? &could_rec : NULL,
                         (unsigned)msec );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_sem_pusherror( L, rv );
   lua_pushboolean( L, could_rec );
   return 1;
 }
@@ -129,7 +129,7 @@ static int l_sem_inc( lua_State* L ) {
   l_sem_handle* h = luaL_checkudata( L, 1, NAME );
   int rv = ipc_sem_inc( &h->h );
   if( rv != 0 )
-    return pusherror( L, rv );
+    return l_sem_pusherror( L, rv );
   lua_pushboolean( L, 1 );
   return 1;
 }
@@ -158,6 +158,7 @@ IPC_API int luaopen_ipc_sem( lua_State* L ) {
   luaL_newlib( L, functions );
   return 1;
 }
+#undef NAME
 
 #else /* no implementation for this platform available: */
 IPC_API int luaopen_ipc_sem( lua_State* L ) {
