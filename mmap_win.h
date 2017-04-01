@@ -88,14 +88,14 @@ static int ipc_mmap_open( ipc_mmap_handle* h, char const* name,
       CloseHandle( hfile );
       return IPC_ERR( saved_errno );
     }
-    if( fsize.QuadPart < offset ) {
+    if( (ULONGLONG)fsize.QuadPart < offset ) {
       CloseHandle( hfile );
       return IPC_ERR( ERROR_INVALID_PARAMETER );
     }
     if( fsize.QuadPart - offset > (size_t)-1 )
       h->len = (size_t)-1;
     else
-      h->len = fsize.QuadPart - offset;
+      h->len = (size_t)(fsize.QuadPart - offset);
   }
   msize = (ULONGLONG)h->len + offset;
   /* create the anonymous file mapping */

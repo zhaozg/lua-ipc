@@ -144,6 +144,11 @@ typedef int lua_KContext;
 
 #endif
 
+IPC_API int luaopen_ipc_filelock(lua_State* L);
+IPC_API int luaopen_ipc_mmap(lua_State* L);
+IPC_API int luaopen_ipc_proc(lua_State* L);
+IPC_API int luaopen_ipc_shm(lua_State* L);
+IPC_API int luaopen_ipc_strfile(lua_State* L);
 
 #endif /* IPC_H_ */
 

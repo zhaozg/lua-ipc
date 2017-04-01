@@ -219,21 +219,21 @@ static int memfile_seek( lua_State* L ) {
   int ok = 1;
   switch( op ) {
     case 0: /* SEEK_SET */
-      if( offset < 0 || offset > mf->n )
+      if( offset < 0 || (size_t)offset > mf->n )
         ok = 0;
       else
         mf->p = offset;
       break;
     case 1: /* SEEK_CUR */
-      if( (offset < 0 && -(offset+1) >= mf->p ) ||
-          (offset >= 0 && offset > mf->n-mf->p) )
+      if( (offset < 0 && (size_t)(-(offset+1)) >= mf->p ) ||
+          (offset >= 0 && (size_t)offset > mf->n-mf->p) )
         ok = 0;
       else
         mf->p += offset;
       break;
     default: /* SEEK_END */
       if( offset > 0 ||
-          (offset < 0 && -(offset+1) >= mf->n) )
+          (offset < 0 && (size_t)(-(offset+1)) >= mf->n) )
         ok = 0;
       else
         mf->p = mf->n + offset;

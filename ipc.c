@@ -112,13 +112,20 @@ IPC_LOCAL void* ipc_testudata( lua_State* L, int idx,
 #endif /* LUA_VERSION_NUM == 501 */
 
 
-#ifdef _WIN32
 /* LuaRocks with MSVC can't really handle multiple modules in a single
  * DLL, so we have to export the luaopen_ functions ourself, and let
  * LuaRocks think that the ipc.dll contains the ipc module: */
 IPC_API int luaopen_ipc( lua_State* L ) {
-  (void)L;
-  return 0;
+  lua_newtable(L);
+  luaopen_ipc_filelock(L);
+  lua_setfield(L, -2, "filelock");
+  luaopen_ipc_mmap(L);
+  lua_setfield(L, -2, "mmap");
+  luaopen_ipc_proc(L);
+  lua_setfield(L, -2, "proc");
+  luaopen_ipc_shm(L);
+  lua_setfield(L, -2, "shm");
+  luaopen_ipc_strfile(L);
+  lua_setfield(L, -2, "strfile");
+  return 1;
 }
-#endif
-
