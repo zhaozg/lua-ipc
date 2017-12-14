@@ -85,33 +85,6 @@ IPC_LOCAL int ipc_err( char const* file, int line, char const* func,
 }
 
 
-/* implementation of compatibility functions */
-#if LUA_VERSION_NUM == 501
-IPC_LOCAL int ipc_absindex( lua_State* L, int idx ) {
-  if( idx < 0 && idx > LUA_REGISTRYINDEX )
-    idx += lua_gettop( L );
-  return idx;
-}
-
-
-IPC_LOCAL void* ipc_testudata( lua_State* L, int idx,
-                               char const* name ) {
-  void* p = lua_touserdata( L, idx );
-  if( p == NULL || !lua_getmetatable( L, idx ) )
-    return NULL;
-  else {
-    int res = 0;
-    luaL_getmetatable( L, name );
-    res = lua_rawequal( L, -1, -2 );
-    lua_pop( L, 2 );
-    if( !res )
-      p = NULL;
-  }
-  return p;
-}
-#endif /* LUA_VERSION_NUM == 501 */
-
-
 /* LuaRocks with MSVC can't really handle multiple modules in a single
  * DLL, so we have to export the luaopen_ functions ourself, and let
  * LuaRocks think that the ipc.dll contains the ipc module: */
