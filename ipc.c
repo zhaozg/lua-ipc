@@ -89,7 +89,7 @@ IPC_LOCAL int ipc_err( char const* file, int line, char const* func,
 #if LUA_VERSION_NUM == 501
 IPC_LOCAL int ipc_absindex( lua_State* L, int idx ) {
   if( idx < 0 && idx > LUA_REGISTRYINDEX )
-    idx += lua_gettop( L );
+    idx += lua_gettop( L )+1;
   return idx;
 }
 
