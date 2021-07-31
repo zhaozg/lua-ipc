@@ -13,7 +13,7 @@ IPC_LOCAL FILE* ipc_checkfile( lua_State* L, int idx ) {
   if( *fp == NULL )
     luaL_error( L, "attempt to use closed file" );
   return *fp;
-#elif LUA_VERSION_NUM >= 502 && LUA_VERSION_NUM <= 503
+#elif LUA_VERSION_NUM >= 502
   luaL_Stream* s = luaL_checkudata( L, idx, LUA_FILEHANDLE );
   if( s->closef == 0 || s->f == NULL )
     luaL_error( L, "attempt to use closed file" );
@@ -32,7 +32,7 @@ IPC_LOCAL FILE* ipc_testfile( lua_State* L, int idx ) {
   else if( *fp == NULL )
     luaL_error( L, "attempt to use closed filed" );
   return *fp;
-#elif LUA_VERSION_NUM >= 502 && LUA_VERSION_NUM <= 503
+#elif LUA_VERSION_NUM >= 502
   luaL_Stream* s = luaL_testudata( L, idx, LUA_FILEHANDLE );
   if( s == NULL )
     return NULL;
