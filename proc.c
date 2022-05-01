@@ -160,7 +160,10 @@ static int startoutput( lua_State* L, l_proc_handle* h, int idx ) {
 }
 
 
-LUA_KFUNCTION( l_proc_waitk ) {
+typedef int lua_KContext;
+
+typedef int (*lua_KFunction)(lua_State *L, int status, lua_KContext ctx);
+int l_proc_waitk(lua_State *L, int status, lua_KContext ctx) {
   l_proc_handle* h = lua_touserdata( L, 1 );
   int child_complete = 0;
   int stdin_complete = 0;

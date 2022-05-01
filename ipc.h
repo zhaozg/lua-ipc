@@ -5,9 +5,39 @@
 #include <stdio.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <assert.h>
 
-#ifdef LUA_COMPAT53
-#include LUA_COMPAT53
+#if LUA_VERSION_NUM < 502
+/* lua_rawlen: Not entirely correct, but should work anyway */
+# ifndef lua_rawlen
+#	define lua_rawlen lua_objlen
+# endif
+/* lua_...uservalue: Something very different, but it should get the job done */
+# ifndef lua_getuservalue
+#	define lua_getuservalue lua_getfenv
+# endif
+# ifndef lua_setuservalue
+#	define lua_setuservalue lua_setfenv
+# endif
+# ifndef luaL_newlib
+#	define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
+# endif
+# ifndef luaL_setfuncs
+#	define luaL_setfuncs(L,l,n) (assert(n==0), luaL_register(L,NULL,l))
+# endif
+#define lua_callk(L, na, nr, ctx, cont) \
+  ((void)(ctx), (void)(cont), lua_call((L), (na), (nr)))
+#define lua_pcallk(L, na, nr, err, ctx, cont) \
+  ((void)(ctx), (void)(cont), lua_pcall((L), (na), (nr), (err)))
+
+#define lua_resume(L, from, nargs) \
+  ((void)(from), lua_resume((L), (nargs)))
+
+inline static int lua_absindex (lua_State *L, int i) {
+  if (i < 0 && i > LUA_REGISTRYINDEX)
+    i += lua_gettop(L) + 1;
+  return i;
+}
 #endif
 
 #ifndef IPC_LOCAL

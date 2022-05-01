@@ -84,7 +84,6 @@ IPC_LOCAL int ipc_err( char const* file, int line, char const* func,
   return code;
 }
 
-
 /* LuaRocks with MSVC can't really handle multiple modules in a single
  * DLL, so we have to export the luaopen_ functions ourself, and let
  * LuaRocks think that the ipc.dll contains the ipc module: */
