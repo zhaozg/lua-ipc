@@ -22,9 +22,6 @@
 # ifndef luaL_newlib
 #	define luaL_newlib(L,l) (lua_newtable(L), luaL_register(L,NULL,l))
 # endif
-# ifndef luaL_setfuncs
-#	define luaL_setfuncs(L,l,n) (assert(n==0), luaL_register(L,NULL,l))
-# endif
 #define lua_callk(L, na, nr, ctx, cont) \
   ((void)(ctx), (void)(cont), lua_call((L), (na), (nr)))
 #define lua_pcallk(L, na, nr, err, ctx, cont) \
