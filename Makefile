@@ -27,6 +27,9 @@ install: ${DLLNAME}
 	mkdir -p ${DLL_INSTALL_DIR}
 	cp ${DLLNAME} ${DLL_INSTALL_DIR}
 
+test: ${DLLNAME}
+	luajit tests/run.lua
+
 clean:
 	rm -f ${DLLNAME} ${OBJECTS}
 
