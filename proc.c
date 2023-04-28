@@ -159,8 +159,9 @@ static int startoutput( lua_State* L, l_proc_handle* h, int idx ) {
   return rv;
 }
 
-
+#ifndef LUA_KCONTEXT
 typedef int lua_KContext;
+#endif
 
 typedef int (*lua_KFunction)(lua_State *L, int status, lua_KContext ctx);
 int l_proc_waitk(lua_State *L, int status, lua_KContext ctx) {
