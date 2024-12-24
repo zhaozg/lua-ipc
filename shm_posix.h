@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+#include <limits.h>
 
 typedef struct {
   char name[ NAME_MAX ];

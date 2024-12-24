@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <semaphore.h>
+#include <limits.h>
 
 
 typedef struct {
